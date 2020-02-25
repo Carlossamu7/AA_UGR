@@ -7,7 +7,7 @@ Created on Mon Feb 17 17:54:38 2020
 import numpy as np
 from sklearn import datasets
 from matplotlib import pyplot as plt
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedShuffleSplit
 import math
 
 #######################
@@ -51,11 +51,10 @@ def ejercicio2(x, y):
     print("----- Ejercicio 2 -----")
 
     # Separamos train (80%) y test (20%)
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=.20, random_state=7)
-    sss = StratifiedShuffleSplit(n_splits=1, test_size=0.2)
-    for index_train, index_test in sss.split(x, y):
-        x_train, x_test = x[index_train], x[index_test]
-        y_train, y_test = y[index_train], y[index_test]
+    stratisfiedSplit = StratifiedShuffleSplit(n_splits=1, test_size=0.2)
+    for ind_train, ind_test in stratisfiedSplit.split(x, y):
+        x_train, x_test = x[ind_train], x[ind_test]
+        y_train, y_test = y[ind_train], y[ind_test]
 
     # Imprimo los conjuntos train y test
     print("x_train:\n", x_train)
@@ -74,7 +73,7 @@ def ejercicio3():
     print("----- Ejercicio 3 -----")
 
     # Obtenemos 100 valores equiespaciados entre 0 y 2PI
-    puntos = np.linspace(0, 2*math.pi, num=100)
+    puntos = np.linspace(0, 2*np.pi, num=100)
     print("100 valores equiespaciados entre 0 y 2PI:\n", puntos)
 
     # Calculamos imágenes de sin(x), cos(x) y sin(x)+cos(x) con x en puntos
