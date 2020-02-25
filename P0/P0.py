@@ -22,18 +22,16 @@ def ejercicio1():
     # Leemos la base de datos de Iris
     iris = datasets.load_iris()
 
-    # Obtenemos las características y clases
-    x = iris.data; y = iris.target
-
-    # Nos quedamos con las 2 últimas características
-    select = x[-2::]
+    # Obtenemos las 2 últimas características y clases
+    x = iris.data[:, -2:];
+    y = iris.target
 
     # Visualizamos con Scatter plot
     plt.scatter(x[0:50:,0],x[0:50:,1], label="Setosa", c="red")
     plt.scatter(x[50:100:,0],x[50:100:,1], label="Versicolor", c="green")
     plt.scatter(x[100::,0],x[100::,1], label="Virginica", c="blue")
-    plt.xlabel("Largo del sépalo")
-    plt.ylabel("Ancho del sépalo")
+    plt.xlabel("Largo del pétalo")
+    plt.ylabel("Ancho del pétalo")
     plt.legend(loc="lower right")
     plt.title("Base de datos de Iris")
     plt.gcf().canvas.set_window_title('Ejercicio 1')
@@ -54,11 +52,16 @@ def ejercicio2(x, y):
 
     # Separamos train (80%) y test (20%)
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=.20, random_state=7)
+    sss = StratifiedShuffleSplit(n_splits=1, test_size=0.2)
+    for index_train, index_test in sss.split(x, y):
+        x_train, x_test = x[index_train], x[index_test]
+        y_train, y_test = y[index_train], y[index_test]
 
+    # Imprimo los conjuntos train y test
     print("x_train:\n", x_train)
-    print("x_test:\n", x_test)
-    print("y_train:\n", y_train)
-    print("y_test:\n", y_test)
+    print("\nx_test:\n", x_test)
+    print("\ny_train:\n", y_train)
+    print("\ny_test:\n", y_test)
 
 
 #######################
@@ -69,9 +72,10 @@ def ejercicio2(x, y):
     Gráficas de sin(x), cos(x) y sin(x) + cos(x) con x en [0,2PI]"""
 def ejercicio3():
     print("----- Ejercicio 3 -----")
-    
+
     # Obtenemos 100 valores equiespaciados entre 0 y 2PI
     puntos = np.linspace(0, 2*math.pi, num=100)
+    print("100 valores equiespaciados entre 0 y 2PI:\n", puntos)
 
     # Calculamos imágenes de sin(x), cos(x) y sin(x)+cos(x) con x en puntos
     sen = []; cos = []; sen_cos = []
@@ -79,6 +83,11 @@ def ejercicio3():
         sen.append(math.sin(i))
         cos.append(math.cos(i))
         sen_cos.append(math.sin(i) + math.cos(i))
+
+    # Imprimo por pantalla los valores
+    print("\nSeno de los valores:\n", sen)
+    print("\nCoseno de los valores:\n", cos)
+    print("\nSuma de seno y coseno de los valores:\n", sen_cos)
 
     # Visualizamos
     plt.plot(puntos, sen, 'k--', label="sin(x)")
