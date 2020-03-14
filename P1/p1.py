@@ -94,11 +94,12 @@ def gradf(w):
 
 """ a) Usar gradiente descendente para minimizar la función f, con punto inicial (1,1)
 tasa de aprendizaje 0.01 y max 50 iteraciones. Repetir con tasa de aprend. 0.1 """
+""" Función de GD que almacena los resultados para construir una gráfica """
 def gd_grafica(w, lr, grad_fun, fun, max_iters = 100000):
 	it = 0
 	graf = np.zeros(max_iters)
 	while it < max_iters:
-		graf[it] = fun(w)	# Guarda resultado de la iteración
+		graf[it] = fun(w)	# Guardamos el resultado de la iteración
 		w = w - lr*gradf(w)
 		it += 1
 
@@ -113,19 +114,19 @@ def gd_grafica(w, lr, grad_fun, fun, max_iters = 100000):
 
 """ b) Obtener el valor minimo y los valores de (x,y) con los
  puntos de inicio siguientes: """
-
+""" Usando GD muestra el punto inicial, el mínimo y el valor del mínimo """
 def print_gd(w, lr, grad_fun, fun, epsilon, max_iters = 1000000000):
-	w, _ = gd(w, lr, grad_fun, fun, epsilon, max_iters)
 	print("\n   Punto de inicio: ({}, {})".format(w[0], w[1]))
+	w, _ = gd(w, lr, grad_fun, fun, epsilon, max_iters)
 	print("   (x,y) = ({} , {})".format(w[0], w[1]))
 	print("   Valor minimo: {}".format(f(w)))
 
 def apartado3():
 	print ("\n###  Apartado 3  ###\n")
 
-	print ("a) Grafica con learning rate igual a 0.01")
+	print ("a) Gráfica con learning rate igual a 0.01")
 	g1 = gd_grafica(np.array([1.0, -1.0]), 0.01, gradf, f, 50)
-	print ("   Grafica con learning rate igual a 0.1")
+	print ("   Gráfica con learning rate igual a 0.1")
 	g2 = gd_grafica(np.array([1.0, -1.0]), 0.1, gradf, f, 50)
 	# Comparamos las gráficas
 	plt.plot(g1, 'b-o', label=r"$\eta$ = {}".format(0.01))
