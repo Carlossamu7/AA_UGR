@@ -32,6 +32,7 @@ def gd(w, lr, grad_fun, fun, epsilon=-math.inf, max_iters=100000):
 		it += 1
 	return w, it
 
+""" Función que ejecuta todo el apartado 1 """
 def apartado1():
 	print ("\n###  Apartado 1  ###\n")
 	print("def gd(w, lr, grad_fun, fun, epsilon=-math.inf, max_iters=100000):")
@@ -44,13 +45,11 @@ def apartado1():
 
 #------------------------------ Apartado 2 -------------------------------------#
 
-np.random.seed(1)	# Fijamos la semilla
-
 """ Función E del apartado 2 """
 def E(w):
 	return (w[0]*np.exp(w[1]) - 2*w[1]*np.exp(-w[0]))**2
 
-""" Derivada parcial de E respecto de u"""
+""" Derivada parcial de E respecto de u """
 def Eu(w):
 	return 2 * (w[0]*np.exp(w[1]) - 2*w[1]*np.exp(-w[0])) * (np.exp(w[1]) + 2*w[1]*np.exp(-w[0]))
 
@@ -62,6 +61,7 @@ def Ev(w):
 def gradE(w):
 	return np.array([Eu(w), Ev(w)])
 
+""" Función que ejecuta todo el apartado 2 """
 def apartado2():
 	print ("\n###  Apartado 2  ###\n")
 	w, num_ite = gd(np.array([1.0, 1.0]), 0.1, gradE, E, 1e-14)
@@ -94,7 +94,7 @@ def gradf(w):
 
 """ a) Usar gradiente descendente para minimizar la función f, con punto inicial (1,1)
 tasa de aprendizaje 0.01 y max 50 iteraciones. Repetir con tasa de aprend. 0.1 """
-""" Función de GD que almacena los resultados para construir una gráfica """
+""" Función de GD que almacena los resultados para construir una gráfica. """
 def gd_grafica(w, lr, grad_fun, fun, max_iters = 100000):
 	it = 0
 	graf = np.zeros(max_iters)
@@ -121,6 +121,7 @@ def print_gd(w, lr, grad_fun, fun, epsilon, max_iters = 1000000000):
 	print("   (x,y) = ({} , {})".format(w[0], w[1]))
 	print("   Valor minimo: {}".format(f(w)))
 
+""" Función que ejecuta todo el apartado 3 """
 def apartado3():
 	print ("\n###  Apartado 3  ###\n")
 
@@ -129,6 +130,7 @@ def apartado3():
 	print ("   Gráfica con learning rate igual a 0.1")
 	g2 = gd_grafica(np.array([1.0, -1.0]), 0.1, gradf, f, 50)
 	# Comparamos las gráficas
+	print ("   Comparación de las dos gráficas anteriores")
 	plt.plot(g1, 'b-o', label=r"$\eta$ = {}".format(0.01))
 	plt.plot(g2, 'r-o', label=r"$\eta$ = {}".format(0.1))
 	plt.xlabel('Iteraciones'); plt.ylabel('f(x,y)');
@@ -147,7 +149,7 @@ def apartado3():
 	input("--- Pulsar tecla para continuar ---")
 
 #------------------------------ Apartado 4 -------------------------------------#
-
+""" Función que ejecuta todo el apartado 4 """
 def apartado4():
 	print ("\n###  Apartado 4  ###\n")
 
