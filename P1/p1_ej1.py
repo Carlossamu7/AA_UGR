@@ -94,7 +94,13 @@ def gradf(w):
 
 """ a) Usar gradiente descendente para minimizar la función f, con punto inicial (1,1)
 tasa de aprendizaje 0.01 y max 50 iteraciones. Repetir con tasa de aprend. 0.1 """
-""" Función de GD que almacena los resultados para construir una gráfica. """
+""" Función de GD que almacena los resultados para construir una gráfica.
+- w: vector inicial.
+- lr: tasa de aprendizaje.
+- grad_fun: gradiente de 'fun'.
+- fun: función (diferenciable) a minimizar.
+- max_iters: máximo número de iteraciones.
+"""
 def gd_grafica(w, lr, grad_fun, fun, max_iters = 100000):
 	it = 0
 	graf = np.zeros(max_iters)
@@ -114,8 +120,15 @@ def gd_grafica(w, lr, grad_fun, fun, max_iters = 100000):
 
 """ b) Obtener el valor minimo y los valores de (x,y) con los
  puntos de inicio siguientes: """
-""" Usando GD muestra el punto inicial, el mínimo y el valor del mínimo """
-def print_gd(w, lr, grad_fun, fun, epsilon, max_iters = 1000000000):
+""" Usando GD muestra el punto inicial, el mínimo y el valor del mínimo
+- w: vector inicial.
+- lr: tasa de aprendizaje.
+- grad_fun: gradiente de 'fun'.
+- fun: función (diferenciable) a minimizar.
+- epsilon: máximo error permitido.
+- max_iters: máximo número de iteraciones.
+"""
+def print_gd(w, lr, grad_fun, fun, epsilon, max_iters = 100000):
 	print("\n   Punto de inicio: ({}, {})".format(w[0], w[1]))
 	w, _ = gd(w, lr, grad_fun, fun, epsilon, max_iters)
 	print("   (x,y) = ({} , {})".format(w[0], w[1]))

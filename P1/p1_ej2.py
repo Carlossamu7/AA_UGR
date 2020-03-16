@@ -142,8 +142,9 @@ def experiment():
 """ Función que ejecuta todo el apartado 2 """
 def apartado2():
 	# EXPERIMENTO
-	# a) Muestra de entrenamiento N = 1000, cuadrado [-1,1]x[-1,1]
 	print ("\n### Apartado 2 ###\n")
+
+	# a) Muestra de entrenamiento N = 1000, cuadrado [-1,1]x[-1,1]
 	print ("a) Muestra N = 1000, cuadrado [-1,1]x[-1,1]")
 	x = simula_unif(1000, 2, 1)
 	plt.scatter(x[:,0], x[:,1])
