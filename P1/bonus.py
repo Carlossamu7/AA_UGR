@@ -11,8 +11,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
-np.random.seed(1)	# Fijamos la semilla
-
 #-------------------------------------------------------------------------------#
 #------------------------------------ Bonus ------------------------------------#
 #-------------------------------------------------------------------------------#
@@ -34,12 +32,12 @@ def gradf(w):
 	return np.array([fx(w), fy(w)])
 
 """ Hessiana de f """
-def hessf(x, y):
+def hessf(w):
 	return np.array([
-		2 - 8*np.pi**2*np.sin(2*np.pi*x)*np.sin(2*np.pi*y),
-		8*np.pi**2*np.cos(2*np.pi*x)*np.cos(2*np.pi*y),
-		8*np.pi**2*np.cos(2*np.pi*x)*np.cos(2*np.pi*y),
-		4 - 8*np.pi**2*np.sin(2*np.pi*x)*np.sin(2*np.pi*y)
+		2 - 8*np.pi**2*np.sin(2*np.pi*w[0])*np.sin(2*np.pi*w[1]),
+		8*np.pi**2*np.cos(2*np.pi*w[0])*np.cos(2*np.pi*w[1]),
+		8*np.pi**2*np.cos(2*np.pi*w[0])*np.cos(2*np.pi*w[1]),
+		4 - 8*np.pi**2*np.sin(2*np.pi*w[0])*np.sin(2*np.pi*w[1])
 	]).reshape((2, 2))
 
 # Rescato esta función de p1_ej1.py
@@ -66,7 +64,7 @@ def newton(w, lr, grad_fun, fun, hess_fun, max_iters = 100000):
 	it = 0
 
 	while it < max_iters:
-		w = w - lr*np.linalg.inv(hess_fun(w[0],w[1])).dot(grad_fun(w))
+		w = w - lr*np.linalg.inv(hess_fun(w)).dot(grad_fun(w))
 		w_list.append(w)
 		it += 1
 
