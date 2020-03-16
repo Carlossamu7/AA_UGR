@@ -74,7 +74,7 @@ def sgd(x, y, lr, max_iters, tam_minibatch):
 
 """ Calcula w usando el algoritmo de la pseudoinversa """
 def pseudoinverse(x, y):
-	x_pinv = np.linalg.inv(x.T.dot(x)).dot(x.T)	# (X^T * X)^-1 * X^T
+	x_pinv = np.linalg.inv(x.T.dot(x)).dot(x.T)	# (x^T * x)^-1 * x^T
 	return np.dot(x_pinv, y)					# w = pseudoinversa(x) * y
 
 """ Función que ejecuta todo el apartado 1 """
@@ -86,17 +86,29 @@ def apartado1():
 	x_test, y_test = readData('datos/X_test.npy', 'datos/y_test.npy')
 
 	# Gradiente descendente estocástico
-	w = sgd(x, y, 0.01, 10000, 32)
+	w_sgd = sgd(x, y, 0.01, 10000, 32)
 	print ("Bondad del resultado para grad. descendente estocástico:")
-	print ("Ein: ", Err(x, y, w))
-	print ("Eout: ", Err(x_test, y_test, w))
+	print ("Ein: ", Err(x, y, w_sgd))
+	print ("Eout: ", Err(x_test, y_test, w_sgd))
 
 	# Algoritmo Pseudoinversa
-	w = pseudoinverse(x, y)
+	w_pinv = pseudoinverse(x, y)
 	print ("\nBondad del resultado para el algoritmo de la pseudoinversa:")
-	print ("Ein: ", Err(x, y, w))
-	print ("Eout: ", Err(x_test, y_test, w))
+	print ("Ein: ", Err(x, y, w_pinv))
+	print ("Eout: ", Err(x_test, y_test, w_pinv))
 
+	input("--- Pulsar tecla para continuar ---\n")
+
+	print ("Gráfica con los datos y los modelos de SGD y pseudoinversa")
+	plt.scatter(x[y==1][:,1], x[y==1][:,2], label="Etiqueta 1")
+	plt.scatter(x[y==-1][:,1], x[y==-1][:,2], c='orange', label="Etiqueta -1")
+	x = np.array([np.min(x[:, 1]), np.max(x[:, 1])])
+	plt.plot(x, (-w_sgd[1]*x - w_sgd[0])/w_sgd[2], c='red', label="SGD")
+	plt.plot(x, (-w_pinv[1]*x - w_pinv[0])/w_pinv[2], c='green', label="Pseudoinversa")
+	plt.legend()
+	plt.title("Regresión lineal con SGD y pseudoinversa")
+	plt.gcf().canvas.set_window_title('Ejercicio 2 - Apartado 1')
+	plt.show()
 	input("--- Pulsar tecla para continuar ---\n")
 
 #------------------------------ Apartado 2 -------------------------------------#
@@ -135,6 +147,8 @@ def apartado2():
 	print ("a) Muestra N = 1000, cuadrado [-1,1]x[-1,1]")
 	x = simula_unif(1000, 2, 1)
 	plt.scatter(x[:,0], x[:,1])
+	plt.title("Muestra de entrenamiento N = 1000, cuadrado [-1,1]x[-1,1]")
+	plt.gcf().canvas.set_window_title('Ejercicio 2 - Apartado 2a)')
 	plt.show()
 
 	# b) Mapa de etiquetas usando la función f y con un 10% de ruido
@@ -143,6 +157,8 @@ def apartado2():
 	plt.scatter(x[y==1][:,0], x[y==1][:,1], label="Etiqueta 1")
 	plt.scatter(x[y==-1][:,0], x[y==-1][:,1], c='orange', label="Etiqueta -1")
 	plt.legend()
+	plt.title("Mapa de etiquetas sobre la muestra en [-1,1]x[-1,1]")
+	plt.gcf().canvas.set_window_title('Ejercicio 2 - Apartado 2b)')
 	plt.show()
 
 	# c) Usando (1, x1, x2) ajustar un modelo de regresion lineal al conjunto de

@@ -152,6 +152,11 @@ def apartado3():
 """ Función que ejecuta todo el apartado 4 """
 def apartado4():
 	print ("\n###  Apartado 4  ###\n")
+	print ("Explicación en la memoria. Muy brevemente:")
+	print("- Diferenciabilidad de la función.")
+	print("- Convexidad nos asgura encotrar el mínimo global.")
+	print("- Fundamental: elección de la tasa de aprendizaje y el pto inical.")
+	print("- Hacer una batería de pruebas para la elección cuando la función sea compleja.\n")
 
 ########################
 #####     MAIN     #####
