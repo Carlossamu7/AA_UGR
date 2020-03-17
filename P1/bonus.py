@@ -86,12 +86,21 @@ def print_newton(w, lr, grad_fun, fun, hess_fun, max_iters = 100000):
 
 """ Función que ejecuta todo el apartado 1 """
 def apartado1():
-	# Representación de curva de decrecimiento
+	# Representación de curva de decrecimiento para Newton
+	print("\nCurva de decrecimiento usando Newton")
+	g3 = np.apply_along_axis(f, 1, newton(np.array([1.0, -1.0]), 0.01, gradf, f, hessf, 50))
+	g4 = np.apply_along_axis(f, 1, newton(np.array([1.0, -1.0]), 0.1, gradf, f, hessf, 50))
+	plt.plot(g3, 'g-o', label=r"Newton, $\eta$ = 0.01")
+	plt.plot(g4, 'c-o', label=r"Newton, $\eta$ = 0.1")
+	plt.legend()
+	plt.title("Curva de decrecimiento usando Newton")
+	plt.gcf().canvas.set_window_title('Bonus')
+	plt.show()
+	input("--- Pulsar tecla para continuar ---")
+
 	print("\nComparación de las curvas de GD y Newton")
 	g1 = gd_grafica(np.array([1.0, -1.0]), 0.01, gradf, f, 50)
 	g2 = gd_grafica(np.array([1.0, -1.0]), 0.1, gradf, f, 50)
-	g3 = np.apply_along_axis(f, 1, newton(np.array([1.0, -1.0]), 0.01, gradf, f, hessf, 50))
-	g4 = np.apply_along_axis(f, 1, newton(np.array([1.0, -1.0]), 0.1, gradf, f, hessf, 50))
 	plt.plot(g1, 'b-o', label=r"GD, $\eta$ = 0.01")
 	plt.plot(g2, 'k-o', label=r"GD, $\eta$ = 0.1")
 	plt.plot(g3, 'g-o', label=r"Newton, $\eta$ = 0.01")
