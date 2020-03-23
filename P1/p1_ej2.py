@@ -56,7 +56,7 @@ def dErr(x, y, w):
 - max_iters: número máximo de iteraciones.
 - tam_minibatch: tamaño del minibatch. """
 def sgd(x, y, lr, max_iters, tam_minibatch):
-	w = np.zeros(3)
+	w = np.zeros(len(x[0]))
 	it = 0
 	ind_set = np.random.permutation(np.arange(len(x)))	 # conjunto de índices
 	begin = 0					# Comienzo de la muestra
@@ -133,16 +133,50 @@ def experiment():
 	x = np.hstack((np.ones((1000, 1)), simula_unif(1000, 2, 1)))
 	y = f(x[:,0],x[:,1])
 	x_test = np.hstack((np.ones((1000, 1)), simula_unif(1000, 2, 1)))
-	y_test = f(x[:,0],x[:,1])
+	y_test = f(x_test[:,1],x_test[:,2])
 	w = sgd(x, y, 0.01, 1000, 32)
 	Ein = Err(x, y, w)
 	Eout = Err(x_test, y_test, w)
 	return np.array([Ein, Eout])
 
+""" Crea el vector de características no lineales """
+def nl_features():
+	aux = simula_unif(1000, 2, 1)
+	nonlinear = np.empty((len(aux),3))
+	for i in range(len(aux)):
+		nonlinear[i][0] = aux[i][0]*aux[i][1]
+		nonlinear[i][1] = aux[i][0]*aux[i][0]
+		nonlinear[i][2] = aux[i][1]*aux[i][1]
+	x = np.hstack((np.ones((1000, 1)), aux, nonlinear))
+	y = f(x[:,1],x[:,2])
+	return x,y
+
+""" Experemiento a ejecutar 1000 veces """
+def experiment_nl():
+	x,y = nl_features()
+	x_test, y_test = nl_features()
+	w = sgd(x, y, 0.01, 1000, 32)
+	Ein = Err(x, y, w)
+	Eout = Err(x_test, y_test, w)
+	"""
+	plt.scatter(x[y==1][:,1], x[y==1][:,2], label="Etiqueta 1")
+	plt.scatter(x[y==-1][:,1], x[y==-1][:,2], c='orange', label="Etiqueta -1")
+	x = np.array([np.min(x[:, 1]), np.max(x[:, 1])])
+	plt.plot(x, (-(w[2] + w[3]*x) + math.sqrt((w[2]+w[3]*x)**2 - 4*w[5]*(w[0]+w[1]*x+w[4]*x**2))) / 2 * (w[0]+w[1]*x+w[4]*x**2), c='red', label="SGD")
+	#plt.plot(x, (-(w[2] + w[3]*x) - math.sqrt((w[2]+w[3]*x)**2 - 4*w[5]*(w[0]+w[1]*x+w[4]*x**2))) / 2 * (w[0]+w[1]*x+w[4]*x**2), c='red')
+	plt.legend()
+	plt.title("Regresión con características no lineales")
+	plt.gcf().canvas.set_window_title('Ejercicio 2 - Apartado 2')
+	plt.show()
+	"""
+	return np.array([Ein, Eout])
+
 """ Función que ejecuta todo el apartado 2 """
 def apartado2():
+print ("\n### Apartado 2 ###\n")
+
 	# EXPERIMENTO
-	print ("\n### Apartado 2 ###\n")
+	print("EXPERIMENTO\n")
 
 	# a) Muestra de entrenamiento N = 1000, cuadrado [-1,1]x[-1,1]
 	print ("a) Muestra N = 1000, cuadrado [-1,1]x[-1,1]")
@@ -175,6 +209,17 @@ def apartado2():
 	N = 1000; errs = np.array([0.,0.])
 	for _ in range(N):
 		errs = errs + experiment()
+	Ein_media, Eout_media = errs/N
+	print ("   Ein media: ", Ein_media)
+	print ("   Eout media: ", Eout_media)
+	input("--- Pulsar tecla para continuar ---")
+
+	# EXPERIMENTO CON CARACTERÍSTICAS NO LINEALES
+	print("EXPERIMENTO CON CARACTERÍSTICAS NO LINEALES\n")
+	print ("\n   Errores Ein y Eout medios tras 1000reps del experimento:")
+	errs = np.array([0.,0.])
+	for _ in range(N):
+		errs = errs + experiment_nl()
 	Ein_media, Eout_media = errs/N
 	print ("   Ein media: ", Ein_media)
 	print ("   Eout media: ", Eout_media)

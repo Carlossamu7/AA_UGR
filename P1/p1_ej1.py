@@ -106,7 +106,7 @@ def gd_grafica(w, lr, grad_fun, fun, max_iters = 100000):
 	graf = np.zeros(max_iters)
 	while it < max_iters:
 		graf[it] = fun(w)	# Guardamos el resultado de la iteración
-		w = w - lr*gradf(w)
+		w = w - lr*grad_fun(w)
 		it += 1
 
 	# Dibujamos la gráfica
