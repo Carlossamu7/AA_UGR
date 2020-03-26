@@ -154,7 +154,7 @@ def apartado3():
 	input("--- Pulsar tecla para continuar ---")
 
 	print("\nb) Mínimo y valor donde se alcanza según el punto inicial:")
-	lrate = 0.01; eps = 0.0001; max_it = 1000
+	lrate = 0.01; eps = -math.inf; max_it = 1000
 	print_gd(np.array([2.1, -2.1]), lrate, gradf, f, eps, max_it)
 	print_gd(np.array([3.0, -3.0]), lrate, gradf, f, eps, max_it)
 	print_gd(np.array([1.5, 1.5]), lrate, gradf, f, eps, max_it)

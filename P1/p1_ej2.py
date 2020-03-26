@@ -161,8 +161,8 @@ def experiment_nl():
 	"""
 	plt.scatter(x[y==1][:,1], x[y==1][:,2], label="Etiqueta 1")
 	plt.scatter(x[y==-1][:,1], x[y==-1][:,2], c='orange', label="Etiqueta -1")
-	x = np.array([np.min(x[:, 1]), np.max(x[:, 1])])
-	plt.plot(x, (-(w[2] + w[3]*x) + math.sqrt((w[2]+w[3]*x)**2 - 4*w[5]*(w[0]+w[1]*x+w[4]*x**2))) / 2 * (w[0]+w[1]*x+w[4]*x**2), c='red', label="SGD")
+	x = np.array([np.min(x[:, 1]), np.max(x[:, 1
+	#plt.plot(x, (-(w[2] + w[3]*x) + math.sqrt((w[2]+w[3]*x)**2 - 4*w[5]*(w[0]+w[1]*x+w[4]*x**2))) / 2 * (w[0]+w[1]*x+w[4]*x**2), c='red', label="SGD")
 	#plt.plot(x, (-(w[2] + w[3]*x) - math.sqrt((w[2]+w[3]*x)**2 - 4*w[5]*(w[0]+w[1]*x+w[4]*x**2))) / 2 * (w[0]+w[1]*x+w[4]*x**2), c='red')
 	plt.legend()
 	plt.title("Regresión con características no lineales")
@@ -173,7 +173,7 @@ def experiment_nl():
 
 """ Función que ejecuta todo el apartado 2 """
 def apartado2():
-print ("\n### Apartado 2 ###\n")
+	print ("\n### Apartado 2 ###\n")
 
 	# EXPERIMENTO
 	print("EXPERIMENTO\n")
@@ -215,8 +215,8 @@ print ("\n### Apartado 2 ###\n")
 	input("--- Pulsar tecla para continuar ---")
 
 	# EXPERIMENTO CON CARACTERÍSTICAS NO LINEALES
-	print("EXPERIMENTO CON CARACTERÍSTICAS NO LINEALES\n")
-	print ("\n   Errores Ein y Eout medios tras 1000reps del experimento:")
+	print("\nEXPERIMENTO CON CARACTERÍSTICAS NO LINEALES\n")
+	print ("   Errores Ein y Eout medios tras 1000reps del experimento:")
 	errs = np.array([0.,0.])
 	for _ in range(N):
 		errs = errs + experiment_nl()
