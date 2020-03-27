@@ -131,7 +131,7 @@ def f(x1, x2):
 """ Experemiento a ejecutar 1000 veces """
 def experiment():
 	x = np.hstack((np.ones((1000, 1)), simula_unif(1000, 2, 1)))
-	y = f(x[:,0],x[:,1])
+	y = f(x[:,1],x[:,2])
 	x_test = np.hstack((np.ones((1000, 1)), simula_unif(1000, 2, 1)))
 	y_test = f(x_test[:,1],x_test[:,2])
 	w = sgd(x, y, 0.01, 1000, 32)
