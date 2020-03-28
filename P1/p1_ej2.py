@@ -152,23 +152,24 @@ def nl_features():
 	return x,y
 
 """ Experemiento a ejecutar 1000 veces """
-def experiment_nl():
+def experiment_nl(N):
 	x,y = nl_features()
 	x_test, y_test = nl_features()
 	w = sgd(x, y, 0.01, 1000, 32)
 	Ein = Err(x, y, w)
 	Eout = Err(x_test, y_test, w)
-	"""
-	plt.scatter(x[y==1][:,1], x[y==1][:,2], label="Etiqueta 1")
-	plt.scatter(x[y==-1][:,1], x[y==-1][:,2], c='orange', label="Etiqueta -1")
-	x = np.array([np.min(x[:, 1]), np.max(x[:, 1
-	#plt.plot(x, (-(w[2] + w[3]*x) + math.sqrt((w[2]+w[3]*x)**2 - 4*w[5]*(w[0]+w[1]*x+w[4]*x**2))) / 2 * (w[0]+w[1]*x+w[4]*x**2), c='red', label="SGD")
-	#plt.plot(x, (-(w[2] + w[3]*x) - math.sqrt((w[2]+w[3]*x)**2 - 4*w[5]*(w[0]+w[1]*x+w[4]*x**2))) / 2 * (w[0]+w[1]*x+w[4]*x**2), c='red')
-	plt.legend()
-	plt.title("Regresión con características no lineales")
-	plt.gcf().canvas.set_window_title('Ejercicio 2 - Apartado 2')
-	plt.show()
-	"""
+
+	if(N==1): # solo imprimo la elipse la primera vez
+		plt.scatter(x[y==1][:,1], x[y==1][:,2], label="Etiqueta 1")
+		plt.scatter(x[y==-1][:,1], x[y==-1][:,2], c='orange', label="Etiqueta -1")
+		X1, X2 = np.meshgrid(np.arange(-1,1,0.025), np.arange(-1,1,0.025))
+		G = w[0] + w[1]*X1 + w[2]*X2 + w[3]*X1*X2 + w[4]*(X1**2) + w[5]*(X2**2)
+		plt.contour(X1, X2, G, [0], colors='red')
+		plt.legend()
+		plt.title("Regresión con características no lineales")
+		plt.gcf().canvas.set_window_title('Ejercicio 2 - Apartado 2')
+		plt.show()
+
 	return np.array([Ein, Eout])
 
 """ Función que ejecuta todo el apartado 2 """
@@ -201,6 +202,15 @@ def apartado2():
 	x_ones = np.hstack((np.ones((1000, 1)), x))	# columna de 1s
 	w = sgd(x_ones, y, 0.01, 1000, 32)
 	print("\nc) Bondad del resultado para SGD:")
+	plt.scatter(x[y==1][:,0], x[y==1][:,1], label="Etiqueta 1")
+	plt.scatter(x[y==-1][:,0], x[y==-1][:,1], c='orange', label="Etiqueta -1")
+	X1, X2 = np.meshgrid(np.arange(-1,1,0.025), np.arange(-1,1,0.025))
+	G = w[0] + w[1]*X1 + w[2]*X2
+	plt.contour(X1, X2, G, [0], colors='red')
+	plt.legend()
+	plt.title("Regresión con características lineales")
+	plt.gcf().canvas.set_window_title('Ejercicio 2 - Apartado 2c)')
+	plt.show()
 	print("   Ein:  {}".format(Err(x_ones, y, w)))
 	input("--- Pulsar tecla para continuar ---")
 
@@ -218,8 +228,8 @@ def apartado2():
 	print("\nEXPERIMENTO CON CARACTERÍSTICAS NO LINEALES\n")
 	print ("   Errores Ein y Eout medios tras 1000reps del experimento:")
 	errs = np.array([0.,0.])
-	for _ in range(N):
-		errs = errs + experiment_nl()
+	for i in range(N):
+		errs = errs + experiment_nl(i)
 	Ein_media, Eout_media = errs/N
 	print ("   Ein media: ", Ein_media)
 	print ("   Eout media: ", Eout_media)
