@@ -42,7 +42,6 @@ def simula_recta(intervalo):
 
 	return a, b
 
-
 #------------------------------ Apartado 1 -------------------------------------#
 
 """ Función que ejecuta todo el apartado 1 """
@@ -61,7 +60,7 @@ def apartado1():
 	plt.title("Nube de puntos con simula_gaus")
 	plt.gcf().canvas.set_window_title('Ejercicio 1 - Apartado 1b)')
 	plt.show()
-	input("--- Pulsar tecla para continuar ---")
+	input("\n--- Pulsar tecla para continuar ---")
 
 #------------------------------ Apartado 2 -------------------------------------#
 
@@ -78,7 +77,7 @@ def signo(x):
 - a: pendiente de la recta.
 - b: ordenada en el origen de la recta."""
 def f(x, y, a, b):
-	return signo(y - a*x - b)
+	return y - a*x - b
 
 """ Función que ejecuta todo el apartado 2 """
 def apartado2():
@@ -88,7 +87,7 @@ def apartado2():
 	x = simula_unif(N, 2, [-50, 50])
 	y = np.empty((N, ))
 	for i in range(N):
-		y[i] = f(x[i,0], x[i,1], a, b)
+		y[i] = signo(f(x[i,0], x[i,1], a, b))
 
 	print("a) Gráfica con las etiquetas de los puntos y la recta simulada.")
 	plt.scatter(x[y == -1][:, 0], x[y == -1][:, 1], label="Etiqueta -1")
@@ -100,7 +99,7 @@ def apartado2():
 	plt.gcf().canvas.set_window_title('Ejercicio 1 - Apartado 2a)')
 	plt.show()
 
-	print("b) Gráfica con las etiquetas de los puntos CON RUIDO y la recta simulada.")
+	print("\nb) Gráfica con las etiquetas de los puntos CON RUIDO y la recta simulada.")
 	y_noise = np.copy(y)	# Introducimos ruido en el 10%
 	ind = np.random.choice(N, size=int(N/10), replace=False)
 	for i in ind:
@@ -114,7 +113,7 @@ def apartado2():
 	plt.gcf().canvas.set_window_title('Ejercicio 1 - Apartado 2b)')
 	plt.show()
 
-	input("--- Pulsar tecla para continuar ---")
+	input("\n--- Pulsar tecla para continuar ---")
 	return x, y_noise
 
 #------------------------------ Apartado 3 -------------------------------------#
@@ -144,7 +143,7 @@ def f4(x, y):
 	return y - 20*x**2 - 5*x + 3
 
 """ Para cada función pasada por argumento visualiza los puntos (x) con sus etiquetas (y)
-y la grafica de la función como frontera de clasificación.
+y la gráfica de la función como frontera de clasificación.
 - x: vector de puntos 2D que son las características.
 - y: vector de etiquetas.
 - fun: función a representar.
@@ -161,14 +160,11 @@ def print_graf(x, y, fun, title=""):
 	plt.legend()
 	plt.show()
 
-"""Obtiene el porcentaje de puntos correctamente clasificados
-por un clasificador dado.
-Argumentos posicionales:
-- datos: datos,
-- labels: etiquetas,
-- clasificador: Clasificador"""
+""" Calcula el porcentaje de puntos bien clasificados
+- datos: datos.
+- labels: etiquetas.
+- fun: función clasificadora."""
 def get_porc(datos, labels, fun):
-	# Los campos no negativos indican clasificación correcta
 	signos = labels*fun(datos[:, 0], datos[:, 1])
 	return 100*len(signos[signos >= 0])/len(labels)
 
@@ -183,7 +179,7 @@ def apartado3(x, y):
 	print("Acierto para '{}': {}%".format("Elipse3", get_porc(x, y, f3)))
 	print_graf(x, y, f4, "Parábola")
 	print("Acierto para '{}': {}%".format("Parábola", get_porc(x, y, f4)))
-	input("--- Pulsar tecla para continuar ---")
+	input("\n--- Pulsar tecla para continuar ---")
 
 ########################
 #####     MAIN     #####
