@@ -39,7 +39,7 @@ def signo(x):
 		return 1
 	return -1
 
-""" Función clasificadora mediante una recta
+""" Función clasificadora mediante una recta.
 - x: primera variable de la función.
 - y: segunda variable de la función.
 - a: pendiente de la recta.
@@ -51,15 +51,14 @@ def f(x, y, a, b):
 
 """ Calcula el hiperplano solución a un problema de clasificación binaria.
 Devuelve el vector de pesos y el número de iteraciones.
-- datos: matriz de datos,
-- labels: etiquetas,
-- max_iter: número máximo de iteraciones
-- vini: Valor inicial
-"""
-def ajusta_PLA(datos, labels, max_iter, vini):
+- datos: matriz de datos.
+- labels: etiquetas.
+- max_iters: número máximo de iteraciones.
+- vini: valor inicial."""
+def ajusta_PLA(datos, labels, max_iters, vini):
 	w = vini.copy()
 
-	for it in range(1, max_iter + 1):
+	for it in range(1, max_iters + 1):
 		w_old = w.copy()
 
 		for dato, label in zip(datos, labels):
@@ -72,7 +71,7 @@ def ajusta_PLA(datos, labels, max_iter, vini):
 	return w, it
 
 """ Calcula el porcentaje de puntos bien clasificados
-- datos: datos.
+- datos: matriz de datos.
 - labels: etiquetas.
 - fun: función clasificadora."""
 def get_porc(datos, labels, w):
@@ -80,9 +79,9 @@ def get_porc(datos, labels, w):
 	return 100*len(signos[signos >= 0])/len(labels)
 
 """ Ejecuta ajusta_PLA() con vini un vector de ceros y luego 10 aleatorios
-- datos: matriz de datos,
-- labels: etiquetas,
-- max_iter: número máximo de iteraciones
+- datos: matriz de datos.
+- labels: etiquetas.
+- max_iters: número máximo de iteraciones.
 """
 def ejecuta_PLA(datos, labels, max_iters):
 	print("   Vector inicial cero")
@@ -124,38 +123,37 @@ def apartado1():
 
 #------------------------------ Apartado 2 -------------------------------------#
 
+"""	Calcula el gradiente de la Regresión Logística.
+- dato: un sólo vector de características.
+- label: etiqueta del vector.
+- w: vector de pesos.
+"""
 def grad_RL(dato, label, w):
 	return -label*dato/(1 + np.exp(label*w.dot(dato)))
 
-"""Implementa el algoritmo de regresión logística
-mediante SGD con tamaño de batch 1.
-Argumentos posicionales:
-- datos: datos y
+"""	Algoritmo de regresión logística con SGD.
+- datos: matriz de datos.
 - labels: etiquetas.
-Devuelve: Vector w que define el clasificador.
+- eta: tasa de aprendizaje.
 """
-def sgd_RL(datos, labels, eta=0.01):
-	N, dim = datos.shape
-	w = np.zeros(dim)
-	ha_cambiado = True  # Si ha variado en la época actual
-	idxs = np.arange(N)  # vector de índices
+def sgd_RL(datos, labels, eta):
+	w = np.zeros(len(datos[0]))
+	ind_set = np.arange(len(datos))
+	changed = True  		# indica si ha habido cambios en una época
 
-	while ha_cambiado:
+	while changed:
 		w_old = w.copy()
-		idxs = np.random.permutation(idxs)
-		for idx in idxs:
-			w += -eta*grad_RL(datos[idx], labels[idx], w)
-		ha_cambiado = np.linalg.norm(w - w_old) > 0.01
+		ind_set = np.random.permutation(ind_set)
+		for ind in ind_set:
+			w = w - eta*grad_RL(datos[ind], labels[ind], w)
+		changed = np.linalg.norm(w - w_old) > 0.01
 
 	return w
 
-"""Calcula el error de un clasificador logístico para una muestra de datos.
-Argumentos opcionales:
-- w: Vector de pesos del clasificador logístico,
-- x: datos en coordenadas homogéneas,
-- y: etiquetas
-Devuelve:
-- El error logístico"""
+"""Calcula el error logístico.
+- dato: un sólo vector de características.
+- label: etiqueta del vector.
+- w: vector de pesos."""
 def Err_RL(datos, labels, w):
 	return np.mean(np.log(1 + np.exp(-labels*datos.dot(w))))
 
@@ -173,7 +171,7 @@ def apartado2():
 		labels[i] = signo(f(datos[i, 1], datos[i, 2], a, b))
 
 	# Calculamos el vector de pesos usando RL+SGD
-	w = sgd_RL(datos, labels)
+	w = sgd_RL(datos, labels, 0.01)
 
 	# Representamos la recta obtenida
 	plt.scatter(datos[labels == -1][:, 1], datos[labels == -1][:, 2], label="Etiqueta -1")
@@ -206,7 +204,7 @@ def apartado2():
 	print("   Aciertos (test): {}%".format(get_porc(datos_test, labels_test, w)))
 	print("   Eout: {}".format(Err_RL(datos_test, labels_test, w)))
 
-	input("\n--- Pulsar tecla para continuar ---")
+	input("\n--- Pulsar tecla para continuar ---\n")
 
 ########################
 #####     MAIN     #####

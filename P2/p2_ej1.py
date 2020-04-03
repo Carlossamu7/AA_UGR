@@ -179,7 +179,7 @@ def apartado3(x, y):
 	print("Acierto para '{}': {}%".format("Elipse3", get_porc(x, y, f3)))
 	print_graf(x, y, f4, "Parábola")
 	print("Acierto para '{}': {}%".format("Parábola", get_porc(x, y, f4)))
-	input("\n--- Pulsar tecla para continuar ---")
+	input("\n--- Pulsar tecla para continuar ---\n")
 
 ########################
 #####     MAIN     #####
