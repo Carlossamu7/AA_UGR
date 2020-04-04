@@ -62,24 +62,25 @@ Devuelve el vector de pesos y el número de iteraciones.
 - max_iters: número máximo de iteraciones.
 - vini: valor inicial."""
 def PLA_Pocket(datos, labels, max_iters, vini):
-	w = vini.copy()
-	w_best = w.copy()
+	w_best = vini.copy()
 	err_best = Err(datos, labels, w_best)
 
 	for it in range(1, max_iters + 1):
-		w_old = w.copy()
+		w = w_best.copy()
+		err = err_best
 
 		for dato, label in zip(datos, labels):
 			if signo(w.dot(dato)) != label:
 				w += label*dato
 
 		err = Err(datos, labels, w)
+
+		if np.all(w == w_best):
+			return w_best, it
+
 		if err < err_best:
 			w_best = w.copy()
 			err_best = err
-
-		if np.all(w == w_old):  # No hay cambios
-			return w_best, it
 
 	return w_best, it
 
@@ -120,7 +121,7 @@ def apartado1y2():
 	plt.plot(points, (-w_pin[1]*points - w_pin[0])/w_pin[2], c="red", label="Pseudoinversa")
 	plt.plot(points, (-w_pla[1]*points - w_pla[0])/w_pla[2], c="green", label="PLA-Pocket")
 	plt.legend()
-	plt.title("Regresión sobre dígitos manuscritos (train)")
+	plt.title("Regresión sobre dígitos manuscritos (test)")
 	plt.gcf().canvas.set_window_title('Bonus')
 	plt.show()
 
@@ -132,6 +133,13 @@ def apartado1y2():
 	print("   Etest para PLA-Pocket   : ", Err(x_test, y_test, w_pla))
 
 	input("\n--- Pulsar tecla para continuar ---\n")
+
+	# Cálculo de las cotas de los errores
+	#print("\nc) Cotas de Ein y Etest.\n")
+	#print("   Ein  : ", Err(x, y, w_pin))
+	#print("   Etest: ", Err(x_test, y_test, w_pin))
+
+	#input("\n--- Pulsar tecla para continuar ---\n")
 
 ########################
 #####     MAIN     #####

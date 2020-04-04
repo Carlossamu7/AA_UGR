@@ -65,7 +65,7 @@ def ajusta_PLA(datos, labels, max_iters, vini):
 			if signo(w.dot(dato)) != label:
 				w += label*dato
 
-		if np.all(w == w_old):  # No hay cambios
+		if np.all(w == w_old):
 			return w, it
 
 	return w, it
@@ -146,7 +146,7 @@ def sgd_RL(datos, labels, eta):
 		ind_set = np.random.permutation(ind_set)
 		for ind in ind_set:
 			w = w - eta*grad_RL(datos[ind], labels[ind], w)
-		changed = np.linalg.norm(w - w_old) > 0.01
+		changed = np.linalg.norm(w - w_old) >= 0.01
 
 	return w
 
