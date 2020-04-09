@@ -47,7 +47,7 @@ def Err(x,y,w):
 
 """ Derivada del error """
 def dErr(x, y, w):
-  return 2/len(x)*(x.T.dot(x.dot(w) - y))
+	return 2/len(x)*(x.T.dot(x.dot(w) - y))
 
 """ Gradiente Descendente Estocastico.
 - x: datos en coordenadas homogéneas.

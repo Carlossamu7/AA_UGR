@@ -83,8 +83,8 @@ def f(x, y, a, b):
 def apartado2():
 	print ("\n###  Apartado 2  ###\n")
 	N = 50
-	a, b = simula_recta([-50, 50])
 	x = simula_unif(N, 2, [-50, 50])
+	a, b = simula_recta([-50, 50])
 	y = np.empty((N, ))
 	for i in range(N):
 		y[i] = signo(f(x[i,0], x[i,1], a, b))
@@ -142,7 +142,7 @@ def f3(x, y):
 def f4(x, y):
 	return y - 20*x**2 - 5*x + 3
 
-""" Para cada función pasada por argumento visualiza los puntos (x) con sus etiquetas (y)
+""" Para cada función pasada por argumento visualiza los puntos con sus etiquetas
 y la gráfica de la función como frontera de clasificación.
 - x: vector de puntos 2D que son las características.
 - y: vector de etiquetas.
@@ -165,8 +165,8 @@ def print_graf(x, y, fun, title=""):
 - labels: etiquetas.
 - fun: función clasificadora."""
 def get_porc(datos, labels, fun):
-	signos = labels*fun(datos[:, 0], datos[:, 1])
-	return 100*len(signos[signos >= 0])/len(labels)
+	aciertos = labels*fun(datos[:, 0], datos[:, 1])
+	return 100*len(aciertos[aciertos >= 0])/len(labels)
 
 """ Función que ejecuta todo el apartado 3 """
 def apartado3(x, y):

@@ -75,8 +75,8 @@ def ajusta_PLA(datos, labels, max_iters, vini):
 - labels: etiquetas.
 - fun: función clasificadora."""
 def get_porc(datos, labels, w):
-	signos = labels*datos.dot(w)
-	return 100*len(signos[signos >= 0])/len(labels)
+	aciertos = labels*datos.dot(w)
+	return 100*len(aciertos[aciertos >= 0])/len(labels)
 
 """ Ejecuta ajusta_PLA() con vini un vector de ceros y luego 10 aleatorios
 - datos: matriz de datos.
