@@ -23,10 +23,10 @@ def readData(file_x, file_y):
 	y = []
 	x = []
 
-	# Solo guardamos los datos cuya clase sea la 1 o la 5
+	# Solo guardamos los datos cuya clase sea la 4 o la 8
 	for i in range(0,datay.size):
-		if datay[i] == 5 or datay[i] == 1:
-			if datay[i] == 5:
+		if datay[i] == 4 or datay[i] == 8:
+			if datay[i] == 4:
 				y.append(1)
 			else:
 				y.append(-1)

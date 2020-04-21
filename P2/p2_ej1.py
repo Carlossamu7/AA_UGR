@@ -79,44 +79,7 @@ def signo(x):
 def f(x, y, a, b):
 	return y - a*x - b
 
-""" Función que ejecuta todo el apartado 2 """
-def apartado2():
-	print ("\n###  Apartado 2  ###\n")
-	N = 50
-	x = simula_unif(N, 2, [-50, 50])
-	a, b = simula_recta([-50, 50])
-	y = np.empty((N, ))
-	for i in range(N):
-		y[i] = signo(f(x[i,0], x[i,1], a, b))
-
-	print("a) Gráfica con las etiquetas de los puntos y la recta simulada.")
-	plt.scatter(x[y == -1][:, 0], x[y == -1][:, 1], label="Etiqueta -1")
-	plt.scatter(x[y == 1][:, 0], x[y == 1][:, 1], c="orange", label="Etiqueta 1")
-	points = np.array([np.min(x[:, 0]), np.max(x[:, 0])])
-	plt.plot(points, a*points+b, c="red", label="Recta simulada")
-	plt.legend()
-	plt.title("Clasificando puntos con la recta simulada")
-	plt.gcf().canvas.set_window_title('Ejercicio 1 - Apartado 2a)')
-	plt.show()
-
-	print("\nb) Gráfica con las etiquetas de los puntos CON RUIDO y la recta simulada.")
-	y_noise = np.copy(y)	# Introducimos ruido en el 10%
-	ind = np.random.choice(N, size=int(N/10), replace=False)
-	for i in ind:
-		y_noise[i] = -y[i]
-
-	plt.scatter(x[y_noise == -1][:, 0], x[y_noise == -1][:, 1], label="Etiqueta -1")
-	plt.scatter(x[y_noise == 1][:, 0], x[y_noise == 1][:, 1], c="orange", label="Etiqueta 1")
-	plt.plot(points, a*points+b, c="red", label="Recta simulada")
-	plt.legend()
-	plt.title("Clasificando puntos (con ruido) con la recta simulada")
-	plt.gcf().canvas.set_window_title('Ejercicio 1 - Apartado 2b)')
-	plt.show()
-
-	input("\n--- Pulsar tecla para continuar ---")
-	return x, y_noise
-
-#------------------------------ Apartado 3 -------------------------------------#
+#------------------------------ Apartado 2c -------------------------------------#
 
 """ Función en dos variables que representa una elipse
 - x: primera variable de la función.
@@ -168,18 +131,53 @@ def get_porc(datos, labels, fun):
 	aciertos = labels*fun(datos[:, 0], datos[:, 1])
 	return 100*len(aciertos[aciertos >= 0])/len(labels)
 
-""" Función que ejecuta todo el apartado 3 """
-def apartado3(x, y):
-	print ("\n###  Apartado 3  ###\n")
-	print_graf(x, y, f1, "Elipse1")
-	print("Acierto para '{}': {}%".format("Elipse1", get_porc(x, y, f1)))
-	print_graf(x, y, f2, "Elipse2")
-	print("Acierto para '{}': {}%".format("Elipse2", get_porc(x, y, f2)))
-	print_graf(x, y, f3, "Elipse3")
-	print("Acierto para '{}': {}%".format("Elipse3", get_porc(x, y, f3)))
-	print_graf(x, y, f4, "Parábola")
-	print("Acierto para '{}': {}%".format("Parábola", get_porc(x, y, f4)))
+""" Función que ejecuta todo el apartado 2 """
+def apartado2():
+	print ("\n###  Apartado 2  ###\n")
+	N = 100
+	x = simula_unif(N, 2, [-50, 50])
+	a, b = simula_recta([-50, 50])
+	y = np.empty((N, ))
+	for i in range(N):
+		y[i] = signo(f(x[i,0], x[i,1], a, b))
+
+	print("a) Gráfica con las etiquetas de los puntos y la recta simulada.")
+	plt.scatter(x[y == -1][:, 0], x[y == -1][:, 1], label="Etiqueta -1")
+	plt.scatter(x[y == 1][:, 0], x[y == 1][:, 1], c="orange", label="Etiqueta 1")
+	points = np.array([np.min(x[:, 0]), np.max(x[:, 0])])
+	plt.plot(points, a*points+b, c="red", label="Recta simulada")
+	plt.legend()
+	plt.title("Clasificando puntos con la recta simulada")
+	plt.gcf().canvas.set_window_title('Ejercicio 1 - Apartado 2a)')
+	plt.show()
+
+	print("\nb) Gráfica con las etiquetas de los puntos CON RUIDO y la recta simulada.")
+	y_noise = np.copy(y)	# Introducimos ruido en el 10%
+	ind = np.random.choice(N, size=int(N/10), replace=False)
+	for i in ind:
+		y_noise[i] = -y[i]
+
+	plt.scatter(x[y_noise == -1][:, 0], x[y_noise == -1][:, 1], label="Etiqueta -1")
+	plt.scatter(x[y_noise == 1][:, 0], x[y_noise == 1][:, 1], c="orange", label="Etiqueta 1")
+	plt.plot(points, a*points+b, c="red", label="Recta simulada")
+	plt.legend()
+	plt.title("Clasificando puntos (con ruido) con la recta simulada")
+	plt.gcf().canvas.set_window_title('Ejercicio 1 - Apartado 2b)')
+	plt.show()
+
+	print ("\nc) Nuevos clasificadores")
+	print_graf(x, y_noise, f1, "Elipse1")
+	print("Acierto para '{}': {}%".format("Elipse1", get_porc(x, y_noise, f1)))
+	print_graf(x, y_noise, f2, "Elipse2")
+	print("Acierto para '{}': {}%".format("Elipse2", get_porc(x, y_noise, f2)))
+	print_graf(x, y_noise, f3, "Elipse3")
+	print("Acierto para '{}': {}%".format("Elipse3", get_porc(x, y_noise, f3)))
+	print_graf(x, y_noise, f4, "Parábola")
+	print("Acierto para '{}': {}%".format("Parábola", get_porc(x, y_noise, f4)))
+
 	input("\n--- Pulsar tecla para continuar ---\n")
+
+
 
 ########################
 #####     MAIN     #####
@@ -191,8 +189,7 @@ def main():
 	print("###  1 EJERCICIO SOBRE LA  COMPLEJIDAD DE H Y EL RUIDO  ###")
 	print("###########################################################")
 	apartado1()
-	x, y = apartado2()
-	apartado3(x, y)
+	apartado2()
 
 if __name__ == "__main__":
 	main()
