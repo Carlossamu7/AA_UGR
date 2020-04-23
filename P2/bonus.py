@@ -30,9 +30,9 @@ def readData(file_x, file_y):
 	for i in range(0,datay.size):
 		if datay[i] == 4 or datay[i] == 8:
 			if datay[i] == 4:
-				y.append(1)
-			else:
 				y.append(-1)
+			else:
+				y.append(1)
 			x.append(np.array([1, datax[i][0], datax[i][1]]))
 
 	x = np.array(x, np.float64)
@@ -40,9 +40,13 @@ def readData(file_x, file_y):
 
 	return x, y
 
-""" Funcion para calcular el error """
-def Err(x,y,w):
-	return ((np.linalg.norm(x.dot(w) - y)**2) / len(x))
+""" Calcula la tasa de error
+- datos: matriz de datos.
+- labels: etiquetas.
+- fun: función clasificadora."""
+def get_err(datos, labels, w):
+	aciertos = labels*datos.dot(w)
+	return 1-(len(aciertos[aciertos >= 0])/len(labels))
 
 """ Calcula w usando el algoritmo de la pseudoinversa """
 def pseudoinverse(x, y):
@@ -64,28 +68,30 @@ Devuelve el vector de pesos y el número de iteraciones.
 - labels: etiquetas.
 - max_iters: número máximo de iteraciones.
 - vini: valor inicial."""
-def PLA_Pocket(datos, labels, max_iters, vini):
-	w_best = vini.copy()
-	err_best = Err(datos, labels, w_best)
+def PLA_Pocket(datos, labels, max_iter, vini):
+    w = vini.copy()
+    w_best = w.copy()
+    err_best = get_err(datos, labels, w_best)
 
-	for it in range(1, max_iters + 1):
-		w = w_best.copy()
-		err = err_best
+    for it in range(1, max_iter + 1):
+        w_last = w.copy()
+        for dato, label in zip(datos, labels):
+            if signo(w.dot(dato)) != label:
+                w += label * dato
 
-		for dato, label in zip(datos, labels):
-			if signo(w.dot(dato)) != label:
-				w += label*dato
+		# calculamos el error
+        err = get_err(datos, labels, w)
 
-		err = Err(datos, labels, w)
+		# Si mejoramos el error
+        if err < err_best:
+            w_best = w.copy()
+            err_best = err
 
-		if np.all(w == w_best):
-			return w_best, it
+		# Si no hay cambios fin
+        if np.all(w == w_last):
+            return w_best
 
-		if err < err_best:
-			w_best = w.copy()
-			err_best = err
-
-	return w_best, it
+    return w_best
 
 """ Calcula y devuelve la cota de Eout.
 - ein: error estimado.
@@ -109,7 +115,7 @@ def apartado1y2():
 	print("Calculando los vectores de pesos con un modelo de regresión lineal.")
 	w_pin = pseudoinverse(x, y)
 	print("Aplicando mejora de PLA-Pocket.\n")
-	w_pla, _ = PLA_Pocket(x, y, 1000, w_pin)
+	w_pla = PLA_Pocket(x, y, 1000, w_pin.reshape(-1,))
 
 	# Representamos las rectas obtenidas para train
 	print("a) Gráfico de los datos de entrenamiento con la función estimada.")
@@ -137,10 +143,10 @@ def apartado1y2():
 
 	# Imprimimos el cálculo de los errores
 	print("\nb) Calcular Ein y Etest.\n")
-	print("   Ein   para Pseudoinversa: ", Err(x, y, w_pin))
-	print("   Etest para Pseudoinversa: ", Err(x_test, y_test, w_pin))
-	e_in = Err(x, y, w_pla)
-	e_test = Err(x_test, y_test, w_pla)
+	print("   Ein   para Pseudoinversa: ", get_err(x, y, w_pin))
+	print("   Etest para Pseudoinversa: ", get_err(x_test, y_test, w_pin))
+	e_in = get_err(x, y, w_pla)
+	e_test = get_err(x_test, y_test, w_pla)
 	print("\n   Ein   para PLA-Pocket   : ", e_in)
 	print("   Etest para PLA-Pocket   : ", e_test)
 	input("\n--- Pulsar tecla para continuar ---\n")
