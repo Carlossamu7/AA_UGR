@@ -11,6 +11,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
+# Fijamos la semilla
+np.random.seed(1)
+
 #-------------------------------------------------------------------------------#
 #------------------------------------ Bonus ------------------------------------#
 #-------------------------------------------------------------------------------#
@@ -39,7 +42,7 @@ def readData(file_x, file_y):
 
 """ Funcion para calcular el error """
 def Err(x,y,w):
-	return (np.linalg.norm(x.dot(w) - y)**2) / len(x)
+	return ((np.linalg.norm(x.dot(w) - y)**2) / len(x))
 
 """ Calcula w usando el algoritmo de la pseudoinversa """
 def pseudoinverse(x, y):
@@ -83,6 +86,13 @@ def PLA_Pocket(datos, labels, max_iters, vini):
 			err_best = err
 
 	return w_best, it
+
+""" Calcula y devuelve la cota de Eout.
+- ein: error estimado.
+- N: tamaño de la muestra.
+- delta: tolerancia."""
+def cotaErr(ein, N, delta):
+	return ein + np.sqrt(1/(2*N)*((3*64+1)*np.log(2) - np.log(delta)))
 
 """ Función que ejecuta todo el apartado 1 """
 def apartado1y2():
@@ -129,17 +139,18 @@ def apartado1y2():
 	print("\nb) Calcular Ein y Etest.\n")
 	print("   Ein   para Pseudoinversa: ", Err(x, y, w_pin))
 	print("   Etest para Pseudoinversa: ", Err(x_test, y_test, w_pin))
-	print("\n   Ein   para PLA-Pocket   : ", Err(x, y, w_pla))
-	print("   Etest para PLA-Pocket   : ", Err(x_test, y_test, w_pla))
-
+	e_in = Err(x, y, w_pla)
+	e_test = Err(x_test, y_test, w_pla)
+	print("\n   Ein   para PLA-Pocket   : ", e_in)
+	print("   Etest para PLA-Pocket   : ", e_test)
 	input("\n--- Pulsar tecla para continuar ---\n")
 
 	# Cálculo de las cotas de los errores
-	#print("\nc) Cotas de Ein y Etest.\n")
-	#print("   Ein  : ", Err(x, y, w_pin))
-	#print("   Etest: ", Err(x_test, y_test, w_pin))
-
-	#input("\n--- Pulsar tecla para continuar ---\n")
+	delta = 0.05
+	print("\nc) Cota de Eout.\n")
+	print("   Usando Ein  : ", cotaErr(e_in, len(x), delta))
+	print("   Usando Etest: ", cotaErr(e_test, len(x_test), delta))
+	input("\n--- Pulsar tecla para continuar ---\n")
 
 ########################
 #####     MAIN     #####

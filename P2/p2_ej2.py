@@ -89,6 +89,18 @@ def ejecuta_PLA(datos, labels, max_iters):
 	print("   Num. iteraciones: {}".format(it))
 	print("   Acierto: {}%".format(get_porc(datos, labels, w)))
 
+	"""
+	# Representamos la recta obtenida
+	plt.scatter(datos[labels == -1][:, 1], datos[labels == -1][:, 2], label="Etiqueta -1")
+	plt.scatter(datos[labels == 1][:, 1], datos[labels == 1][:, 2], c="orange", label="Etiqueta 1")
+	points = np.array([np.min(datos[:, 1]), np.max(datos[:, 1])])
+	plt.plot(points, (-w[1]*points - w[0])/w[2], c="red", label="Recta RL")
+	plt.legend()
+	plt.title("PLA para vector cero")
+	plt.gcf().canvas.set_window_title('Ejercicio 2 - Apartado 1')
+	plt.show()
+	"""
+
 	print("\n   Diez vectores iniciales aleatorios")
 	iters = np.empty((10, ))
 	percs = np.empty((10, ))
@@ -104,7 +116,7 @@ def apartado1():
 	print ("\n###  Apartado 1  ###\n")
 
 	print("a) Ejecutar PLA con los datos del ejercicio 1.2a).\n")
-	N = 50
+	N = 100
 	a, b = simula_recta([-50, 50])
 	x = np.hstack((np.ones((N, 1)), simula_unif(N, 2, [-50, 50])))
 	y = np.empty((N, ))
