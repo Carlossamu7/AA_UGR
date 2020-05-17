@@ -18,60 +18,42 @@ np.random.seed(1)
 #-------------------------------- Clasificación --------------------------------#
 #-------------------------------------------------------------------------------#
 
-""" Funcion para leer los datos """
-def readData(file_x, file_y):
-	# Leemos los ficheros
-	datax = np.load(file_x)
-	datay = np.load(file_y)
-	y = []
-	x = []
-
-	# Solo guardamos los datos cuya clase sea la 4 o la 8
-	for i in range(0,datay.size):
-		if datay[i] == 4 or datay[i] == 8:
-			if datay[i] == 4:
-				y.append(-1)
-			else:
-				y.append(1)
-			x.append(np.array([1, datax[i][0], datax[i][1]]))
-
-	x = np.array(x, np.float64)
-	y = np.array(y, np.float64)
-
-	return x, y
+""" Carga datos leyendo de un fichero de texto.
+- filename: fichero a leer.
+- separator (op): El elemento que separa los datos.
+"""
+def read_split_data(filename, separator):
+	data = np.loadtxt(filename, delimiter=separator)
+	return data[:, :-1], data[:, -1]
 
 #---------------------------- Apartado 1 y 2 -----------------------------------#
 
-"""Calcula el hiperplano que hace de clasificador binario.
-Devuelve el vector de pesos y el número de iteraciones.
-- datos: matriz de datos.
-- labels: etiquetas.
-- max_iters: número máximo de iteraciones.
-- vini: valor inicial."""
-def PLA_Pocket(datos, labels, max_iter, vini):
-    w = vini.copy()
-    w_best = w.copy()
-    err_best = get_err(datos, labels, w_best)
+def visualize_data(x, y, title=None):
+	"""Representa conjunto de puntos 2D clasificados.
+	Argumentos posicionales:
+	- x: Coordenadas 2D de los puntos
+	- y: Etiquetas"""
 
-    for it in range(1, max_iter + 1):
-        w_last = w.copy()
-        for dato, label in zip(datos, labels):
-            if signo(w.dot(dato)) != label:
-                w += label * dato
+	_, ax = plt.subplots()
 
-		# calculamos el error
-        err = get_err(datos, labels, w)
+	# Establece límites
+	xmin, xmax = np.min(x[:, 0]), np.max(x[:, 0])
+	ax.set_xlim(xmin - 1, xmax + 1)
+	ax.set_ylim(np.min(x[:, 1]) - 1, np.max(x[:, 1]) + 1)
 
-		# Si mejoramos el error
-        if err < err_best:
-            w_best = w.copy()
-            err_best = err
+	# Pinta puntos
+	ax.scatter(x[:, 0], x[:, 1], c=y, cmap="tab10", alpha=0.8)
 
-		# Si no hay cambios fin
-        if np.all(w == w_last):
-            return w_best
+	# Pinta etiquetas
+	labels = np.unique(y)
+	for label in labels:
+		centroid = np.mean(x[y == label], axis=0)
+		ax.annotate(int(label), centroid, size=14, weight="bold", color="white", backgroundcolor="black")
 
-    return w_best
+	# Muestra título
+	if title is not None:
+		plt.title(title)
+	plt.show()
 
 
 ########################
@@ -83,6 +65,8 @@ def main():
 	print("\n#################################")
 	print("########  CLASIFICACIÓN  ########")
 	print("#################################")
+	X_train, y_train = read_split_data("datos/optdigits.tra", ",")
+  	X_test, y_test = read_split_data("datos/optdigits.tes", ",")
 
 if __name__ == "__main__":
 	main()
