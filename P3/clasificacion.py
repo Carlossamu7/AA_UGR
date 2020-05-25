@@ -12,13 +12,17 @@ import matplotlib.pyplot as plt
 import math
 from tabulate import tabulate
 
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
 from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import VarianceThreshold
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.model_selection import StratifiedKFold
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import LinearSVC
+from sklearn.model_selection import cross_val_score
 from sklearn.metrics import confusion_matrix
-from sklearn.linear_model import LogisticRegressionCV
-
+import warnings
+warnings.filterwarnings('ignore')
 
 # Fijamos la semilla
 np.random.seed(1)
@@ -37,8 +41,14 @@ def read_split_data(filename, separator):
 	data = np.loadtxt(filename, delimiter=separator, dtype=int)
 	return data[:, :-1], data[:, -1]
 
+""" Muestra información y estadísticas de los datos.
+- X_train: características del conjunto de entrenamiento.
+- y_train: etiquetas del conjunto de entrenamiento.
+- X_test: características del conjunto de test.
+- y_test: etiquetas del conjunto de test.
+"""
 def data_info(X_train, y_train, X_test, y_test):
-	print("\INFORMACIÓN DE LOS DATOS")
+	print("\nINFORMACIÓN DE LOS DATOS:")
 	size_train = X_train.shape[0]
 	size_test = X_test.shape[0]
 	train_perc = 100 * size_train / (size_train+size_test)
@@ -80,7 +90,11 @@ def data_info(X_train, y_train, X_test, y_test):
 
 #------------------------------- Preprocesado ----------------------------------#
 
-"""Muestra matriz de correlación para datos antes y después del preprocesado."""
+""" Muestra matriz de correlación de los datos antes y después del preprocesado.
+- data: datos originales.
+- preprocess_data: datos preprocesados.
+- title (op): título. Por defecto "".
+"""
 def show_preprocess(data, preprocess_data, title=""):
 	fig, axs = plt.subplots(1, 2, figsize=[12.0, 5.8])
 
@@ -96,10 +110,63 @@ def show_preprocess(data, preprocess_data, title=""):
 	fig.colorbar(im, ax=axs.ravel().tolist(), shrink=0.6)
 	plt.show()
 
+#------------------------------ Clasificadores ---------------------------------#
 
-"""Muestra matriz de confusión.
-Versión simplificada del ejemplo
-scikit-learn.org/stable/auto_examples/model_selection/plot_confusion_matrix.html
+""" Funcion para crear una lista de pipelines con el modelo SVM para diferentes valores de C
+sobre los datos preprocesados. Devuelve dicha lista.
+- Cs: Lista de valores C.
+"""
+def SVM_clasificators(Cs):
+    # Inicializando lista de Pipeline
+    pipes = []
+
+    for c in Cs:	# Para cada C se inserta un modelo.
+        pipes.append(Pipeline([("var", VarianceThreshold(threshold=0.0)),
+								   ("scaled", StandardScaler()),
+								   ("PCA", PCA(n_components=0.95)),
+								   ("log",  LinearSVC(C=c, random_state=1, loss='hinge', multi_class="crammer_singer", max_iter=1000))]))
+    return pipes
+
+""" Funcion para crear una lista de pipelines con el modelo RL para diferentes valores de C
+sobre los datos preprocesados. Devuelve dicha lista.
+- Cs: Lista de valores C.
+"""
+def RL_clasificators(Cs):
+    # Inicializando lista de Pipeline
+    pipes = []
+
+    for c in Cs:	# Para cada C se inserta un modelo.
+        pipes.append(Pipeline([("var", VarianceThreshold(threshold=0.0)),
+								   ("scaled", StandardScaler()),
+								   ("PCA", PCA(n_components=0.95)),
+								   ("log",  LogisticRegression(C=c, random_state=1, multi_class='multinomial', max_iter=1000))]))
+    return pipes
+
+""" Funcion para evaluar una lista de modelos.
+Devuelve las medias y desv típicas de cada modelo.
+- models: modelos en formato lista.
+- X: características.
+- y: etiquetas.
+- cv (op): parámetro de validación cruzada. Por defecto 5.
+"""
+def models_eval(models, X, y, cv=5):
+    means = []		# medias de las cv de cada modelo.
+    devs = []		# desv. típicas de las cv de cada modelo.
+
+    # Se evalúan los modelos actualizando dichas listas.
+    for model in models:
+        results = cross_val_score(model, X, y, scoring="accuracy", cv=cv)
+        means.append(abs(results.mean()))		# Valor absoluto de la media
+        devs.append(np.std(results))			# Guardar desviaciones
+
+    return means, devs
+
+#---------------------- Matrices de confución y errores ------------------------#
+
+""" Muestra matriz de confusión.
+- y_real: etiquetas reales.
+- y_pred: etiquetas predichas.
+- norm (op): indica si normalizar (dar en %) la matriz de confusión. Por defecto 'True'.
 """
 def show_confussion_matrix(y_real, y_pred, mtype, norm=True):
 	mat = confusion_matrix(y_real, y_pred)
@@ -122,6 +189,27 @@ def show_confussion_matrix(y_real, y_pred, mtype, norm=True):
 
 	plt.show()
 
+""" Muestra información y estadísticas de los datos.
+- model: modelo.
+- X_train: características del conjunto de entrenamiento.
+- y_train: etiquetas del conjunto de entrenamiento.
+- X_test: características del conjunto de test.
+- y_test: etiquetas del conjunto de test.
+- title (op): título del modelo. Por defecto "".
+"""
+def show_confussion_errors(model, X_train, y_train, X_test, y_test, title=""):
+	print("MEJOR MODELO: '" + title + "'. De ahora en adelante se usa éste.")
+	print(model)
+	print("Entrenando el modelo con el conjunto 'train'.")
+	model.fit(X_train, y_train)
+	print("Haciendo las predicciones sobre 'test'")
+	y_pred = model.predict(X_test)
+	print("Mostrando matriz de confusión sin normalizar.")
+	show_confussion_matrix(y_test, y_pred, title, False)
+	print("Mostrando matriz de confusión normalizada.")
+	show_confussion_matrix(y_test, y_pred, title)
+	print("Error del modelo en 'train': {:.3f}".format(1 - model.score(X_train, y_train)))
+	print("Error del modelo en 'test': {:.3f}".format(1 - model.score(X_test, y_test)))
 
 ########################
 #####     MAIN     #####
@@ -132,14 +220,14 @@ def main():
 	print("\n#################################")
 	print("########  CLASIFICACIÓN  ########")
 	print("#################################\n")
-
 	print("Leyendo datos y separando en 'train' y 'test' de 'optdigits'.")
 	X_train, y_train = read_split_data("datos/optdigits.tra", ",")
 	X_test, y_test = read_split_data("datos/optdigits.tes", ",")
+
 	data_info(X_train, y_train, X_test, y_test)
 	input("--- Pulsar tecla para continuar ---\n")
 
-	print("Preprocesando los datos.")
+	print("PREPROCESANDO LOS DATOS")
 	preprocess = [("var", VarianceThreshold(threshold=0.0)), ("scaled", StandardScaler()), ("PCA", PCA(n_components=0.95))]
 	preprocessor = Pipeline(preprocess)
 	X_train_preprocess = preprocessor.fit_transform(X_train)
@@ -152,22 +240,30 @@ def main():
 					X_train_preprocess, "Clasificación de 'optdigits'")
 	input("--- Pulsar tecla para continuar ---\n")
 
-	print("Elección de un modelo logístico.")
-	classification = [("log", LogisticRegressionCV(Cs=4, penalty='l2', cv=5, scoring='accuracy',
-									fit_intercept=True, multi_class='multinomial', max_iter = 2000))]
-	model = Pipeline(preprocess + classification)
-	print(model)
-	print("Entrenando el modelo con el conjunto de 'train'.")
-	model.fit(X_train, y_train)
-	print("Haciendo las predicciones sobre 'test'")
-	y_pred = model.predict(X_test)
-	print("Mostrando matriz de confusión sin normalizar.")
-	show_confussion_matrix(y_test, y_pred, "Logístico", False)
-	print("Mostrando matriz de confusión normalizada.")
-	show_confussion_matrix(y_test, y_pred, "Logístico")
-	print("Error de del modelo logístico en training: {:.3f}".format(1 - model.score(X_train, y_train)))
-	print("Error de del modelo logístico en test: {:.3f}".format(1 - model.score(X_test, y_test)))
+	# Obtener valores medios y desviaciones de las evaluaciones
+	print("EVALUANDO DIFERENTES MODELOS:")
+	print("- Cuatro modelos de 'Regresión Logística'.")
+	print("- Cuatro modelos de 'Support Vector Machines'.")
+	Cs = [0.01, 0.1, 1.0, 10.0]
+	# Validación cruzada 5-fold conservando la proporcion
+	cross_val = StratifiedKFold(n_splits=5, shuffle=True, random_state=1)
+	# Junto todos los clasificadores con Pipeline
+	models = RL_clasificators(Cs) +  SVM_clasificators(Cs)
+	# Evalúo los modelos
+	means, devs = models_eval(models, X_train, y_train, cv=cross_val)
+	# Imprimo resultados
+	tab = [["Modelo", "C", "Media",  "Desv. típica"]]
+	for i in range(len(Cs)):
+		tab.append(["LR", Cs[i], means[i], devs[i]])
+	for i in range(len(Cs)):
+		tab.append(["SVM", Cs[i], means[i+len(Cs)], devs[i+len(Cs)]])
+	print(tabulate(tab, headers='firstrow', tablefmt='fancy_grid'))
 	input("--- Pulsar tecla para continuar ---\n")
+
+	# Mostrando el mejor modelo, su matriz de confusión y sus errores.
+	show_confussion_errors(models[1], X_train, y_train, X_test, y_test, "Regresión Logística con C=0.1")
+	input("--- Pulsar tecla para continuar ---\n")
+
 
 if __name__ == "__main__":
 	main()
