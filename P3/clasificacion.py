@@ -248,7 +248,7 @@ def main():
 	# Validación cruzada 5-fold conservando la proporcion
 	cross_val = StratifiedKFold(n_splits=5, shuffle=True, random_state=1)
 	# Junto todos los clasificadores con Pipeline
-	models = RL_clasificators(Cs) +  SVM_clasificators(Cs)
+	models = RL_clasificators(Cs) + SVM_clasificators(Cs)
 	# Evalúo los modelos
 	means, devs = models_eval(models, X_train, y_train, cv=cross_val)
 	# Imprimo resultados
