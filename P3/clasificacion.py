@@ -21,7 +21,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.svm import LinearSVC
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import confusion_matrix
-import warnings
+import warnings		# Quita warnings
 warnings.filterwarnings('ignore')
 
 # Fijamos la semilla
@@ -60,31 +60,32 @@ def data_info(X_train, y_train, X_test, y_test):
 	print("Intervalo en el que están las características de test: [{},{}]".format(np.min(X_test), np.max(X_test)))
 	print("Intervalo en el que están las etiquetas de test: [{},{}]".format(np.min(y_test), np.max(y_test)))
 	tab = [["Dígito", "Instancias 'train'", "Instancias 'test'"]]
-	num_train = []
+	num_train = [[], []]
 	for i in range(np.min(y_train), np.max(y_train)+1):
-		num_train.append(len(y_train[y_train==i]))
-	num_test = []
+		num_train[0].append(len(y_train[y_train==i]))
+		num_train[1].append(round(100*len(y_train[y_train==i])/len(y_train), 2))
+	num_test = [[], []]
 	for i in range(np.min(y_test), np.max(y_test)+1):
-		num_test.append(len(y_test[y_test==i]))
+		num_test[0].append(len(y_test[y_test==i]))
+		num_test[1].append(round(100*len(y_test[y_test==i])/len(y_test), 2))
 	for i in range(np.min(y_test), np.max(y_test)+1):
-		tab.append([i, num_train[i], num_test[i]])
+		tab.append([i, str(num_train[0][i]) + "  (" + str(num_train[1][i]) + "%)", str(num_test[0][i]) + "  (" + str(num_test[1][i]) + "%)"])
 	print("\nNúmero de instancias de cada dígito para 'train' y 'test'")
-	print(tabulate(tab, headers='firstrow', tablefmt='fancy_grid'))
+	print(tabulate(tab, headers='firstrow', numalign='center', stralign='center', tablefmt='fancy_grid'))
 
-	plt.bar([0,1,2,3,4,5,6,7,8,9], num_train, align="center")
+	plt.bar([0,1,2,3,4,5,6,7,8,9], num_train[0], align="center")
 	plt.xlabel("Dígitos")
 	plt.ylabel("Núm. instancias")
 	plt.title("Gráfica de barras de los datos de 'train'")
 	plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
 	plt.show()
 
-	plt.bar([0,1,2,3,4,5,6,7,8,9], num_test, align="center")
+	plt.bar([0,1,2,3,4,5,6,7,8,9], num_test[0], align="center")
 	plt.xlabel("Dígitos")
 	plt.ylabel("Núm. instancias")
 	plt.title("Gráfica de barras de los datos de 'test'")
 	plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
 	plt.show()
-
 
 #------------------------------- Preprocesado ----------------------------------#
 
@@ -105,6 +106,7 @@ def show_preprocess(data, preprocess_data, title=""):
 	axs[1].title.set_text("Después del preprocesado")
 
 	fig.suptitle(title)
+	plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
 	fig.colorbar(im, ax=axs.ravel().tolist(), shrink=0.6)
 	plt.show()
 
@@ -221,6 +223,8 @@ def main():
 	print("Leyendo datos y separando en 'train' y 'test' de 'optdigits'.")
 	X_train, y_train = read_split_data("datos/optdigits.tra", ",")
 	X_test, y_test = read_split_data("datos/optdigits.tes", ",")
+	print(len(y_train[y_train==1])/len(y_train))
+	print(len(y_test[y_test==1])/len(y_test))
 
 	data_info(X_train, y_train, X_test, y_test)
 	input("--- Pulsar tecla para continuar ---\n")
