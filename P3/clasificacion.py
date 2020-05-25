@@ -59,28 +59,26 @@ def data_info(X_train, y_train, X_test, y_test):
 	print("Intervalo en el que están las etiquetas de train: [{},{}]".format(np.min(y_train), np.max(y_train)))
 	print("Intervalo en el que están las características de test: [{},{}]".format(np.min(X_test), np.max(X_test)))
 	print("Intervalo en el que están las etiquetas de test: [{},{}]".format(np.min(y_test), np.max(y_test)))
-	tab = [['Díg. 0','Díg. 1','Díg. 2','Díg. 3','Díg. 4','Díg. 5','Díg. 6','Díg. 7','Díg. 8','Díg. 9']]
-
-	num = []
+	tab = [["Dígito", "Instancias 'train'", "Instancias 'test'"]]
+	num_train = []
 	for i in range(np.min(y_train), np.max(y_train)+1):
-		num.append(len(y_train[y_train==i]))
-	tab.append(num)
-	print("\nNúmero de instancias de cada dígito para 'train'")
+		num_train.append(len(y_train[y_train==i]))
+	num_test = []
+	for i in range(np.min(y_test), np.max(y_test)+1):
+		num_test.append(len(y_test[y_test==i]))
+	for i in range(np.min(y_test), np.max(y_test)+1):
+		tab.append([i, num_train[i], num_test[i]])
+	print("\nNúmero de instancias de cada dígito para 'train' y 'test'")
 	print(tabulate(tab, headers='firstrow', tablefmt='fancy_grid'))
-	plt.bar([0,1,2,3,4,5,6,7,8,9], tab[1], align="center")
+
+	plt.bar([0,1,2,3,4,5,6,7,8,9], num_train, align="center")
 	plt.xlabel("Dígitos")
 	plt.ylabel("Núm. instancias")
 	plt.title("Gráfica de barras de los datos de 'train'")
 	plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
 	plt.show()
 
-	num = []
-	for i in range(np.min(y_test), np.max(y_test)+1):
-		num.append(len(y_test[y_test==i]))
-	tab[1] = num
-	print("\nNúmero de instancias de cada dígito para 'test'")
-	print(tabulate(tab, headers='firstrow', tablefmt='fancy_grid'))
-	plt.bar([0,1,2,3,4,5,6,7,8,9], tab[1], align="center")
+	plt.bar([0,1,2,3,4,5,6,7,8,9], num_test, align="center")
 	plt.xlabel("Dígitos")
 	plt.ylabel("Núm. instancias")
 	plt.title("Gráfica de barras de los datos de 'test'")
@@ -241,7 +239,7 @@ def main():
 	input("--- Pulsar tecla para continuar ---\n")
 
 	# Obtener valores medios y desviaciones de las evaluaciones
-	print("EVALUANDO DIFERENTES MODELOS:")
+	print("EVALUANDO DIFERENTES MODELOS CON VALIDACIÓN 5-Fold:")
 	print("- Cuatro modelos de 'Regresión Logística'.")
 	print("- Cuatro modelos de 'Support Vector Machines'.")
 	Cs = [0.01, 0.1, 1.0, 10.0]
