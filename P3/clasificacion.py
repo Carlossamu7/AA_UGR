@@ -53,12 +53,16 @@ def data_info(X_train, y_train, X_test, y_test):
 	size_test = X_test.shape[0]
 	train_perc = 100 * size_train / (size_train+size_test)
 	test_perc = 100 * size_test / (size_train+size_test)
-	print("Núm. instancias: {} (train) {} (test).".format(size_train, size_test))
+	print("Núm. instancias: {} (train) {} (test)".format(size_train, size_test))
 	print("Porcentaje (%): {} (train) {} (test)".format(round(train_perc, 3), round(test_perc, 3)))
-	print("Intervalo en el que están las características de train: [{},{}]".format(np.min(X_train), np.max(X_train)))
-	print("Intervalo en el que están las etiquetas de train: [{},{}]".format(np.min(y_train), np.max(y_train)))
-	print("Intervalo en el que están las características de test: [{},{}]".format(np.min(X_test), np.max(X_test)))
-	print("Intervalo en el que están las etiquetas de test: [{},{}]".format(np.min(y_test), np.max(y_test)))
+	print("Outliers en 'train': {}".format(X_train[X_train==np.nan].sum() + y_train[y_train==np.nan].sum()))
+	print("Outliers en 'test': {}".format(X_test[X_test==np.nan].sum() + y_test[y_test==np.nan].sum()))
+	print("Todos los valores son enteros en 'train': {}".format(X_train.dtype==np.int64 and y_train.dtype==np.int64))
+	print("Todos los valores son enteros en 'test': {}".format(X_test.dtype==np.int64 and y_test.dtype==np.int64))
+	print("Intervalo en el que están las características de 'train': [{},{}]".format(np.min(X_train), np.max(X_train)))
+	print("Intervalo en el que están las etiquetas de 'train': [{},{}]".format(np.min(y_train), np.max(y_train)))
+	print("Intervalo en el que están las características de 'test': [{},{}]".format(np.min(X_test), np.max(X_test)))
+	print("Intervalo en el que están las etiquetas de 'test': [{},{}]".format(np.min(y_test), np.max(y_test)))
 	tab = [["Dígito", "Instancias 'train'", "Instancias 'test'"]]
 	num_train = [[], []]
 	for i in range(np.min(y_train), np.max(y_train)+1):
@@ -223,8 +227,6 @@ def main():
 	print("Leyendo datos y separando en 'train' y 'test' de 'optdigits'.")
 	X_train, y_train = read_split_data("datos/optdigits.tra", ",")
 	X_test, y_test = read_split_data("datos/optdigits.tes", ",")
-	print(len(y_train[y_train==1])/len(y_train))
-	print(len(y_test[y_test==1])/len(y_test))
 
 	data_info(X_train, y_train, X_test, y_test)
 	input("--- Pulsar tecla para continuar ---\n")
