@@ -143,7 +143,7 @@ def RL_clasificators(Cs):
         pipes.append(Pipeline([("var", VarianceThreshold(threshold=0.0)),
 								   ("scaled", StandardScaler()),
 								   ("PCA", PCA(n_components=0.95)),
-								   ("log",  LogisticRegression(C=c, random_state=1, multi_class='multinomial', max_iter=1000))]))
+								   ("log",  LogisticRegression(C=c, multi_class='multinomial', max_iter=1000))]))
     return pipes
 
 """ Funcion para evaluar una lista de modelos.
