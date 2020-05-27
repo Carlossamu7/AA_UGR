@@ -116,22 +116,7 @@ def show_preprocess(data, preprocess_data, title=""):
 
 #------------------------------ Clasificadores ---------------------------------#
 
-""" Funcion para crear una lista de pipelines con el modelo SVM para diferentes valores de C
-sobre los datos preprocesados. Devuelve dicha lista.
-- Cs: Lista de valores C.
-"""
-def SVM_clasificators(Cs):
-    # Inicializando lista de Pipeline
-    pipes = []
-
-    for c in Cs:	# Para cada C se inserta un modelo.
-        pipes.append(Pipeline([("var", VarianceThreshold(threshold=0.0)),
-								   ("scaled", StandardScaler()),
-								   ("PCA", PCA(n_components=0.95)),
-								   ("log",  LinearSVC(C=c, random_state=1, loss='hinge', multi_class="crammer_singer", max_iter=1000))]))
-    return pipes
-
-""" Funcion para crear una lista de pipelines con el modelo RL para diferentes valores de C
+""" Función para crear una lista de pipelines con el modelo RL para diferentes valores de C
 sobre los datos preprocesados. Devuelve dicha lista.
 - Cs: Lista de valores C.
 """
@@ -143,7 +128,22 @@ def RL_clasificators(Cs):
         pipes.append(Pipeline([("var", VarianceThreshold(threshold=0.0)),
 								   ("scaled", StandardScaler()),
 								   ("PCA", PCA(n_components=0.95)),
-								   ("log",  LogisticRegression(C=c, multi_class='multinomial', max_iter=1000))]))
+								   ("svm",  LogisticRegression(C=c, multi_class='multinomial'))]))
+    return pipes
+
+""" Función para crear una lista de pipelines con el modelo SVM para diferentes valores de C
+sobre los datos preprocesados. Devuelve dicha lista.
+- Cs: Lista de valores C.
+"""
+def SVM_clasificators(Cs):
+    # Inicializando lista de Pipeline
+    pipes = []
+
+    for c in Cs:	# Para cada C se inserta un modelo.
+        pipes.append(Pipeline([("var", VarianceThreshold(threshold=0.0)),
+								   ("scaled", StandardScaler()),
+								   ("PCA", PCA(n_components=0.95)),
+								   ("log",  LinearSVC(C=c, random_state=1, loss='hinge', multi_class="crammer_singer"))]))
     return pipes
 
 """ Funcion para evaluar una lista de modelos.
@@ -178,7 +178,7 @@ def show_confussion_matrix(y_real, y_pred, mtype, norm=True):
 		mat = 100*mat.astype("float64")/mat.sum(axis=1)[:, np.newaxis]
 	fig, ax = plt.subplots()
 	ax.matshow(mat, cmap="GnBu")
-	ax.set(title="Matriz de confusión para predictor {}".format(mtype),
+	ax.set(title="Matriz de confusión para {}".format(mtype),
 		   xticks=np.arange(10), yticks=np.arange(10),
 		   xlabel="Etiqueta", ylabel="Predicción")
 
@@ -190,7 +190,7 @@ def show_confussion_matrix(y_real, y_pred, mtype, norm=True):
 			else:
 				ax.text(j, i, "{:.0f}".format(mat[i, j]), ha="center", va="center",
 					color="black" if mat[i, j] < 50 else "white")
-
+	plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
 	plt.show()
 
 """ Muestra información y estadísticas de los datos.
@@ -212,8 +212,9 @@ def show_confussion_errors(model, X_train, y_train, X_test, y_test, title=""):
 	show_confussion_matrix(y_test, y_pred, title, False)
 	print("Mostrando matriz de confusión normalizada.")
 	show_confussion_matrix(y_test, y_pred, title)
-	print("Error del modelo en 'train': {:.3f}".format(1 - model.score(X_train, y_train)))
-	print("Error del modelo en 'test': {:.3f}".format(1 - model.score(X_test, y_test)))
+	print("Error del modelo en 'train': {:.5f}".format(1 - model.score(X_train, y_train)))
+	print("Error del modelo en 'test': {:.5f}".format(1 - model.score(X_test, y_test)))
+
 
 ########################
 #####     MAIN     #####
@@ -224,10 +225,10 @@ def main():
 	print("\n#################################")
 	print("########  CLASIFICACIÓN  ########")
 	print("#################################\n")
+
 	print("Leyendo datos y separando en 'train' y 'test' de 'optdigits'.")
 	X_train, y_train = read_split_data("datos/optdigits.tra", ",")
 	X_test, y_test = read_split_data("datos/optdigits.tes", ",")
-
 	data_info(X_train, y_train, X_test, y_test)
 	input("--- Pulsar tecla para continuar ---\n")
 
@@ -265,7 +266,7 @@ def main():
 	input("--- Pulsar tecla para continuar ---\n")
 
 	# Mostrando el mejor modelo, su matriz de confusión y sus errores.
-	show_confussion_errors(models[1], X_train, y_train, X_test, y_test, "Regresión Logística con C=0.1")
+	show_confussion_errors(models[1], X_train, y_train, X_test, y_test, "Regresión Logística (C=0.1)")
 	input("--- Pulsar tecla para continuar ---\n")
 
 
