@@ -10,6 +10,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+from tabulate import tabulate
+
+from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.feature_selection import VarianceThreshold
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.model_selection import StratifiedKFold
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import LinearSVC
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import confusion_matrix
+import warnings		# Quita warnings
+warnings.filterwarnings('ignore')
 
 # Fijamos la semilla
 np.random.seed(1)
@@ -24,43 +38,31 @@ np.random.seed(1)
 - filename: fichero a leer.
 - separator (op): El elemento que separa los datos.
 """
-def read_split_data(filename, separator):
-	data = np.loadtxt(filename, delimiter=separator, dtype=int)
+def read_data(filename, separator):
+	data = np.loadtxt(filename, delimiter=separator, dtype=object)
 	return data[:, :-1], data[:, -1]
 
 """ Muestra información y estadísticas de los datos.
-- X_train: características del conjunto de entrenamiento.
-- y_train: etiquetas del conjunto de entrenamiento.
-- X_test: características del conjunto de test.
-- y_test: etiquetas del conjunto de test.
+- X: características.
+- y: etiquetas.
 """
-def data_info(X_train, y_train, X_test, y_test):
+def data_info(X, y):
 	print("\nINFORMACIÓN DE LOS DATOS:")
-	size_train = X_train.shape[0]
-	size_test = X_test.shape[0]
-	train_perc = 100 * size_train / (size_train+size_test)
-	test_perc = 100 * size_test / (size_train+size_test)
-	print("Núm. instancias: {} (train) {} (test)".format(size_train, size_test))
-	print("Porcentaje (%): {} (train) {} (test)".format(round(train_perc, 3), round(test_perc, 3)))
-	print("Outliers en 'train': {}".format(X_train[X_train==np.nan].sum() + y_train[y_train==np.nan].sum()))
-	print("Outliers en 'test': {}".format(X_test[X_test==np.nan].sum() + y_test[y_test==np.nan].sum()))
-	print("Todos los valores son enteros en 'train': {}".format(X_train.dtype==np.int64 and y_train.dtype==np.int64))
-	print("Todos los valores son enteros en 'test': {}".format(X_test.dtype==np.int64 and y_test.dtype==np.int64))
-	print("Intervalo en el que están las características de 'train': [{},{}]".format(np.min(X_train), np.max(X_train)))
-	print("Intervalo en el que están las etiquetas de 'train': [{},{}]".format(np.min(y_train), np.max(y_train)))
-	print("Intervalo en el que están las características de 'test': [{},{}]".format(np.min(X_test), np.max(X_test)))
-	print("Intervalo en el que están las etiquetas de 'test': [{},{}]".format(np.min(y_test), np.max(y_test)))
+	print("Número de atributos: {}".format(len(X[0])+1))
+	print("Núm. de outliers: {}".format(len(X[X=='?'])))
+	outliers = np.array([('?' in X[:, i]) for i in range(len(X[0]))])
+	print("Núm. atributos que contienen outliers: {}".format(np.count_nonzero(outliers==True)))
+	print(outliers)
+	print("Tipos y cantidad de ellos en los atributos:")
+	tab = [["Nominal", "Numeric", "String", "Decimal", "Semiboolean"], [1, 3, 1, 122, 1]]
+	print(tabulate(tab, headers='firstrow', numalign='center', stralign='center', tablefmt='fancy_grid'))
+	print("Intervalo en el que están las características: [{},{}]".format(np.min(X), np.max(X)))
+	print("Intervalo en el que están las etiquetas: [{},{}]".format(np.min(y), np.max(y)))
 	tab = [["Dígito", "Instancias 'train'", "Instancias 'test'"]]
 	num_train = [[], []]
 	for i in range(np.min(y_train), np.max(y_train)+1):
 		num_train[0].append(len(y_train[y_train==i]))
 		num_train[1].append(round(100*len(y_train[y_train==i])/len(y_train), 2))
-	num_test = [[], []]
-	for i in range(np.min(y_test), np.max(y_test)+1):
-		num_test[0].append(len(y_test[y_test==i]))
-		num_test[1].append(round(100*len(y_test[y_test==i])/len(y_test), 2))
-	for i in range(np.min(y_test), np.max(y_test)+1):
-		tab.append([i, str(num_train[0][i]) + "  (" + str(num_train[1][i]) + "%)", str(num_test[0][i]) + "  (" + str(num_test[1][i]) + "%)"])
 	print("\nNúmero de instancias de cada dígito para 'train' y 'test'")
 	print(tabulate(tab, headers='firstrow', numalign='center', stralign='center', tablefmt='fancy_grid'))
 
@@ -71,12 +73,15 @@ def data_info(X_train, y_train, X_test, y_test):
 	plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
 	plt.show()
 
-	plt.bar([0,1,2,3,4,5,6,7,8,9], num_test[0], align="center")
-	plt.xlabel("Dígitos")
-	plt.ylabel("Núm. instancias")
-	plt.title("Gráfica de barras de los datos de 'test'")
-	plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
-	plt.show()
+#---------------------- Dividiendo en 'train' y 'test' -------------------------#
+
+def split_info(X_train, X_test):
+	size_train = X_train.shape[0]
+	size_test = X_test.shape[0]
+	train_perc = 100 * size_train / (size_train+size_test)
+	test_perc = 100 * size_test / (size_train+size_test)
+	print("Núm. instancias: {} (train) {} (test)".format(size_train, size_test))
+	print("Porcentaje (%): {} (train) {} (test)".format(round(train_perc, 3), round(test_perc, 3)))
 
 #------------------------------- Preprocesado ----------------------------------#
 
@@ -213,10 +218,14 @@ def main():
 	print("#########  REGRESIÓN  #########")
 	print("###############################")
 
-	print("Leyendo datos y separando en 'train' y 'test' de 'optdigits'.")
-	X_train, y_train = read_split_data("datos/optdigits.tra", ",")
-	X_test, y_test = read_split_data("datos/optdigits.tes", ",")
-	data_info(X_train, y_train, X_test, y_test)
+	print("Leyendo datos de 'communities'.")
+	X, y = read_data("datos/communities.data", ",")
+	data_info(X, y)
+	input("--- Pulsar tecla para continuar ---\n")
+
+	print("Separando en 'train' y 'test' los datos de 'communities'")
+	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=1)
+	split_info(X_train, X_test)
 	input("--- Pulsar tecla para continuar ---\n")
 
 if __name__ == "__main__":
