@@ -42,41 +42,119 @@ def read_data(filename, separator):
 	data = np.loadtxt(filename, delimiter=separator, dtype=object)
 	return data[:, :-1], data[:, -1]
 
+def get_headers():
+	return ['state', 'county', 'community', 'communityname', 'fold', 'population', 'householdsize',
+          'racepctblack', 'racePctWhite', 'racePctAsian', 'racePctHisp', 'agePct12t21',
+          'agePct12t29', 'agePct16t24', 'agePct65up', 'numbUrban', 'pctUrban', 'medIncome',
+          'pctWWage', 'pctWFarmSelf', 'pctWInvInc', 'pctWSocSec', 'pctWPubAsst', 'pctWRetire',
+          'medFamInc', 'perCapInc', 'whitePerCap', 'blackPerCap', 'indianPerCap', 'AsianPerCap',
+          'OtherPerCap', 'HispPerCap', 'NumUnderPov', 'PctPopUnderPov', 'PctLess9thGrade',
+          'PctNotHSGrad', 'PctBSorMore', 'PctUnemployed', 'PctEmploy', 'PctEmplManu', 'PctEmplProfServ',
+          'PctOccupManu', 'PctOccupMgmtProf', 'MalePctDivorce', 'MalePctNevMarr', 'FemalePctDiv',
+          'TotalPctDiv', 'PersPerFam', 'PctFam2Par', 'PctKids2Par', 'PctYoungKids2Par', 'PctTeen2Par',
+          'PctWorkMomYoungKids', 'PctWorkMom', 'NumIlleg', 'PctIlleg', 'NumImmig', 'PctImmigRecent',
+          'PctImmigRec5', 'PctImmigRec8', 'PctImmigRec10', 'PctRecentImmig', 'PctRecImmig5',
+          'PctRecImmig8', 'PctRecImmig10', 'PctSpeakEnglOnly', 'PctNotSpeakEnglWell', 'PctLargHouseFam',
+          'PctLargHouseOccup', 'PersPerOccupHous', 'PersPerOwnOccHous', 'PersPerRentOccHous',
+          'PctPersOwnOccup', 'PctPersDenseHous', 'PctHousLess3BR', 'MedNumBR', 'HousVacant',
+          'PctHousOccup', 'PctHousOwnOcc', 'PctVacantBoarded', 'PctVacMore6Mos', 'MedYrHousBuilt',
+          'PctHousNoPhone', 'PctWOFullPlumb', 'OwnOccLowQuart', 'OwnOccMedVal', 'OwnOccHiQuart',
+          'RentLowQ', 'RentMedian', 'RentHighQ', 'MedRent', 'MedRentPctHousInc', 'MedOwnCostPctInc',
+          'MedOwnCostPctIncNoMtg', 'NumInShelters', 'NumStreet', 'PctForeignBorn', 'PctBornSameState',
+          'PctSameHouse85', 'PctSameCity85', 'PctSameState85', 'LemasSwornFT', 'LemasSwFTPerPop',
+          'LemasSwFTFieldOps', 'LemasSwFTFieldPerPop', 'LemasTotalReq', 'LemasTotReqPerPop',
+          'PolicReqPerOffic', 'PolicPerPop', 'RacialMatchCommPol', 'PctPolicWhite', 'PctPolicBlack',
+          'PctPolicHisp', 'PctPolicAsian', 'PctPolicMinor', 'OfficAssgnDrugUnits', 'NumKindsDrugsSeiz',
+          'PolicAveOTWorked', 'LandArea', 'PopDens', 'PctUsePubTrans', 'PolicCars', 'PolicOperBudg',
+          'LemasPctPolicOnPatr', 'LemasGangUnitDeploy', 'LemasPctOfficDrugUn', 'PolicBudgPerPop',
+          'ViolentCrimesPerPop']
+
 """ Muestra información y estadísticas de los datos.
 - X: características.
 - y: etiquetas.
+- statistic (op): si mostrar estadísticas de los datos. Por defecto "True".
 """
-def data_info(X, y):
-	print("\nINFORMACIÓN DE LOS DATOS:")
-	print("Número de atributos: {}".format(len(X[0])+1))
+def data_info(X, y, statistic=True):
+	print("INFORMACIÓN DE LOS DATOS:")
+	print("Número de atributos: {} (uno es el goal)".format(len(X[0])+1))
 	print("Número de outliers: {}".format(len(X[X=='?'])))
 	outliers = np.array([('?' in X[:, i]) for i in range(len(X[0]))])
 	print("Número de atributos que contienen outliers: {}".format(np.count_nonzero(outliers==True)))
 	#print(outliers)
-	print("Tipos y cantidad de ellos en los atributos:")
-	tab = [["Nominal", "Numeric", "String", "Decimal", "Semiboolean"], [1, 3, 1, 122, 1]]
-	print(tabulate(tab, headers='firstrow', numalign='center', stralign='center', tablefmt='fancy_grid'))
 	print("Intervalo en el que están las características: [{},{}]".format(np.min(X), np.max(X)))
 	print("Intervalo en el que están las etiquetas: [{},{}]".format(np.min(y), np.max(y)))
 
-	tab = [["Intervalo", "Núm. instancias"],["[0.0, 0.1]", 0],["[0.1, 0.2]", 0],["[0.2, 0.3]", 0],["[0.3, 0.4]", 0],
-		["[0.4, 0.5]", 0],["[0.5, 0.6]", 0],["[0.6, 0.7]", 0],["[0.7, 0.8]", 0],["[0.8, 0.9]", 0],["[0.9, 1.0]", 0]]
-	num = []
-	for i in range(0,10):
-		num.append(len(y[(i/10<=y) & (y<(i+1)/10)]))
-	num[-1] += len(y[y==1])
-	for i in range(1, len(tab)):
-		tab[i][1] = str(num[i-1]) + "  (" + str(round(100*num[i-1]/len(y), 2)) + "%)"
-	print("\nNúmero de instancias de cada dígito")
-	print(tabulate(tab, headers='firstrow', numalign='center', stralign='center', tablefmt='fancy_grid'))
+	if(statistic):
+		print("Tipos y cantidad de ellos en los atributos:")
+		tab = [["Nominal", "Numeric", "String", "Decimal", "Semiboolean"], [1, 3, 1, 122, 1]]
+		print(tabulate(tab, headers='firstrow', numalign='center', stralign='center', tablefmt='fancy_grid'))
 
-	plt.bar([tab[i][0] for i in range(1,len(tab))], num, align="center")
-	plt.xlabel("Intervalo")
-	plt.ylabel("Núm. instancias")
-	plt.title("Gráfica de barras de las etiquetas")
-	plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
-	plt.show()
+		tab = [["Intervalo", "Núm. instancias"],["[0.0, 0.1)", 0],["[0.1, 0.2)", 0],["[0.2, 0.3)", 0],["[0.3, 0.4)", 0],
+			["[0.4, 0.5)", 0],["[0.5, 0.6)", 0],["[0.6, 0.7)", 0],["[0.7, 0.8)", 0],["[0.8, 0.9)", 0],["[0.9, 1.0]", 0]]
+		num = []
+		for i in range(0,10):
+			num.append(len(y[(i/10<=y) & (y<(i+1)/10)]))
+		num[-1] += len(y[y==1])
+		for i in range(1, len(tab)):
+			tab[i][1] = str(num[i-1]) + "  (" + str(round(100*num[i-1]/len(y), 2)) + "%)"
+		print("\nNúmero de instancias de cada dígito")
+		print(tabulate(tab, headers='firstrow', numalign='center', stralign='center', tablefmt='fancy_grid'))
 
+		plt.bar([tab[i][0] for i in range(1,len(tab))], num, align="center")
+		plt.xlabel("Intervalo")
+		plt.ylabel("Núm. instancias")
+		plt.title("Gráfica de barras de las etiquetas")
+		plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
+		plt.show()
+
+def preprocess_outliers(X, y, headers):
+	print("Índices de atributos no predictivos:")
+	to_delete = [0,1,2,3,4]
+	print(to_delete)
+	newX = np.delete(X, to_delete, axis=1)
+	newX[newX=='?'] = np.nan
+	newX = newX.astype('float64')
+	outliers = np.array([np.count_nonzero(np.isnan(newX[:, i])) for i in range(len(newX[0]))], dtype=int)
+	perc = np.empty(outliers.shape, dtype='float')
+	for i in range(len(perc)):
+		perc[i] = round(100 * outliers[i] / len(newX), 2)
+	np.set_printoptions(suppress=True)
+	print("\nNúmero de 'outliers' por atributo:")
+	print(outliers)
+	print("\nPorcentaje de 'outliers' por atributo:")
+	print(perc)
+	index = np.where(perc>10)[0]
+	to_treat_index = np.where((perc>0) & (perc<=10))[0]
+	print("\nÍndices de atributos con más de un 10% de 'outliers':")
+	print(index+5)
+	newX = np.delete(newX, index, axis=1)
+	print("\nÍndices de atributos con menos de un 10% de 'outliers' que hay que tratar:")
+	print(to_treat_index)
+	for i in to_treat_index:
+		col = newX[:, i]
+		pos = np.where(np.isnan(col))[0]
+		print("\n'outlier' en las posiciones: {}".format(pos))
+		for p in pos:
+			state = X[p][0]
+			print("'State' del 'outlier': " + state)
+			sum = 0
+			count = 0
+			for j in range(len(X)):
+				if(X[j][0]==state and j!=p):
+					sum += newX[j][i]
+					count += 1
+			newX[p][i] = round(sum/count,4)
+			print("Hay {} coincidencias de estado y se inserta el valor medio: {}".format(count, newX[p][i]))
+
+	#Arreglamos cabeceras
+	print("\nCabeceras de los atributos eliminados por ser no predictivos:")
+	print([headers[h] for h in to_delete])
+	newheaders = np.delete(headers, to_delete)
+	print("\nCabeceras de los atributos eliminados por ser 'outliers':")
+	print([newheaders[h] for h in index])
+	newheaders = np.delete(newheaders, index)
+	print("Ajustando las cabeceras de los atributos. De {} a {}".format(len(headers), len(newheaders)))
+	return newX, newheaders
 
 #---------------------- Dividiendo en 'train' y 'test' -------------------------#
 
@@ -88,8 +166,8 @@ def split_info(y_train, y_test):
 	print("Núm. instancias: {} (train) {} (test)".format(size_train, size_test))
 	print("Porcentaje (%): {} (train) {} (test)".format(round(train_perc, 3), round(test_perc, 3)))
 
-	tab = [["Intervalo", "Núm. instancias 'train'", "Núm. instancias 'test'"],["[0.0, 0.1]", 0, 0],["[0.1, 0.2]", 0, 0],["[0.2, 0.3]", 0, 0],
-		["[0.3, 0.4]", 0, 0], ["[0.4, 0.5]", 0, 0],["[0.5, 0.6]", 0, 0],["[0.6, 0.7]", 0, 0],["[0.7, 0.8]", 0, 0],["[0.8, 0.9]", 0, 0],["[0.9, 1.0]", 0, 0]]
+	tab = [["Intervalo", "Núm. instancias 'train'", "Núm. instancias 'test'"],["[0.0, 0.1)", 0, 0],["[0.1, 0.2)", 0, 0],["[0.2, 0.3)", 0, 0],
+		["[0.3, 0.4)", 0, 0], ["[0.4, 0.5)", 0, 0],["[0.5, 0.6)", 0, 0],["[0.6, 0.7)", 0, 0],["[0.7, 0.8)", 0, 0],["[0.8, 0.9)", 0, 0],["[0.9, 1.0]", 0, 0]]
 	num_train = []
 	num_test = []
 	for i in range(0,10):
@@ -252,13 +330,17 @@ def main():
 	print("#########  REGRESIÓN  #########")
 	print("###############################")
 
-	print("\nLeyendo datos de 'communities'.")
+	print("\nLeyendo datos de 'communities'.\n")
 	X, y = read_data("datos/communities.data", ",")
-	newX = np.delete(X, [0,3], axis=1)
-	newX[newX=='?'] = np.nan
-	newX = newX.astype('float64')
+	headers = get_headers()
 	y = y.astype('float64')
 	data_info(X, y)
+	input("--- Pulsar tecla para continuar ---\n")
+
+	print("PREPROCESADO DE OUTLIERS")
+	newX, headers = preprocess_outliers(X, y, headers)
+	input("--- Pulsar tecla para continuar ---\n")
+	data_info(newX, y, False)
 	input("--- Pulsar tecla para continuar ---\n")
 
 	print("Separando en 'train' y 'test' los datos de 'communities'")
