@@ -49,39 +49,73 @@ def read_data(filename, separator):
 def data_info(X, y):
 	print("\nINFORMACIÓN DE LOS DATOS:")
 	print("Número de atributos: {}".format(len(X[0])+1))
-	print("Núm. de outliers: {}".format(len(X[X=='?'])))
+	print("Número de outliers: {}".format(len(X[X=='?'])))
 	outliers = np.array([('?' in X[:, i]) for i in range(len(X[0]))])
-	print("Núm. atributos que contienen outliers: {}".format(np.count_nonzero(outliers==True)))
-	print(outliers)
+	print("Número de atributos que contienen outliers: {}".format(np.count_nonzero(outliers==True)))
+	#print(outliers)
 	print("Tipos y cantidad de ellos en los atributos:")
 	tab = [["Nominal", "Numeric", "String", "Decimal", "Semiboolean"], [1, 3, 1, 122, 1]]
 	print(tabulate(tab, headers='firstrow', numalign='center', stralign='center', tablefmt='fancy_grid'))
 	print("Intervalo en el que están las características: [{},{}]".format(np.min(X), np.max(X)))
 	print("Intervalo en el que están las etiquetas: [{},{}]".format(np.min(y), np.max(y)))
-	tab = [["Dígito", "Instancias 'train'", "Instancias 'test'"]]
-	num_train = [[], []]
-	for i in range(np.min(y_train), np.max(y_train)+1):
-		num_train[0].append(len(y_train[y_train==i]))
-		num_train[1].append(round(100*len(y_train[y_train==i])/len(y_train), 2))
-	print("\nNúmero de instancias de cada dígito para 'train' y 'test'")
+
+	tab = [["Intervalo", "Núm. instancias"],["[0.0, 0.1]", 0],["[0.1, 0.2]", 0],["[0.2, 0.3]", 0],["[0.3, 0.4]", 0],
+		["[0.4, 0.5]", 0],["[0.5, 0.6]", 0],["[0.6, 0.7]", 0],["[0.7, 0.8]", 0],["[0.8, 0.9]", 0],["[0.9, 1.0]", 0]]
+	num = []
+	for i in range(0,10):
+		num.append(len(y[(i/10<=y) & (y<(i+1)/10)]))
+	num[-1] += len(y[y==1])
+	for i in range(1, len(tab)):
+		tab[i][1] = str(num[i-1]) + "  (" + str(round(100*num[i-1]/len(y), 2)) + "%)"
+	print("\nNúmero de instancias de cada dígito")
 	print(tabulate(tab, headers='firstrow', numalign='center', stralign='center', tablefmt='fancy_grid'))
 
-	plt.bar([0,1,2,3,4,5,6,7,8,9], num_train[0], align="center")
-	plt.xlabel("Dígitos")
+	plt.bar([tab[i][0] for i in range(1,len(tab))], num, align="center")
+	plt.xlabel("Intervalo")
 	plt.ylabel("Núm. instancias")
-	plt.title("Gráfica de barras de los datos de 'train'")
+	plt.title("Gráfica de barras de las etiquetas")
 	plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
 	plt.show()
 
+
 #---------------------- Dividiendo en 'train' y 'test' -------------------------#
 
-def split_info(X_train, X_test):
-	size_train = X_train.shape[0]
-	size_test = X_test.shape[0]
+def split_info(y_train, y_test):
+	size_train = len(y_train)
+	size_test = len(y_test)
 	train_perc = 100 * size_train / (size_train+size_test)
 	test_perc = 100 * size_test / (size_train+size_test)
 	print("Núm. instancias: {} (train) {} (test)".format(size_train, size_test))
 	print("Porcentaje (%): {} (train) {} (test)".format(round(train_perc, 3), round(test_perc, 3)))
+
+	tab = [["Intervalo", "Núm. instancias 'train'", "Núm. instancias 'test'"],["[0.0, 0.1]", 0, 0],["[0.1, 0.2]", 0, 0],["[0.2, 0.3]", 0, 0],
+		["[0.3, 0.4]", 0, 0], ["[0.4, 0.5]", 0, 0],["[0.5, 0.6]", 0, 0],["[0.6, 0.7]", 0, 0],["[0.7, 0.8]", 0, 0],["[0.8, 0.9]", 0, 0],["[0.9, 1.0]", 0, 0]]
+	num_train = []
+	num_test = []
+	for i in range(0,10):
+		num_train.append(len(y_train[(i/10<=y_train) & (y_train<(i+1)/10)]))
+		num_test.append(len(y_test[(i/10<=y_test) & (y_test<(i+1)/10)]))
+	num_train[-1] += len(y_train[y_train==1])
+	num_test[-1] += len(y_test[y_test==1])
+	for i in range(1, len(tab)):
+		tab[i][1] = str(num_train[i-1]) + "  (" + str(round(100*num_train[i-1]/len(y_train), 2)) + "%)"
+		tab[i][2] = str(num_test[i-1]) + "  (" + str(round(100*num_test[i-1]/len(y_test), 2)) + "%)"
+	print("\nNúmero de instancias de cada dígito para 'train' y 'test'")
+	print(tabulate(tab, headers='firstrow', numalign='center', stralign='center', tablefmt='fancy_grid'))
+
+	plt.bar([tab[i][0] for i in range(1,len(tab))], num_train, align="center")
+	plt.xlabel("Intervalo")
+	plt.ylabel("Núm. instancias")
+	plt.title("Gráfica de barras de las etiquetas")
+	plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
+	plt.show()
+
+	plt.bar([tab[i][0] for i in range(1,len(tab))], num_test, align="center")
+	plt.xlabel("Intervalo")
+	plt.ylabel("Núm. instancias")
+	plt.title("Gráfica de barras de las etiquetas")
+	plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
+	plt.show()
 
 #------------------------------- Preprocesado ----------------------------------#
 
@@ -218,15 +252,32 @@ def main():
 	print("#########  REGRESIÓN  #########")
 	print("###############################")
 
-	print("Leyendo datos de 'communities'.")
+	print("\nLeyendo datos de 'communities'.")
 	X, y = read_data("datos/communities.data", ",")
+	newX = np.delete(X, [0,3], axis=1)
+	newX[newX=='?'] = np.nan
+	newX = newX.astype('float64')
+	y = y.astype('float64')
 	data_info(X, y)
 	input("--- Pulsar tecla para continuar ---\n")
 
 	print("Separando en 'train' y 'test' los datos de 'communities'")
-	X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=1)
-	split_info(X_train, X_test)
+	X_train, X_test, y_train, y_test = train_test_split(newX, y, test_size=0.25, random_state=1)
+	split_info(y_train, y_test)
 	input("--- Pulsar tecla para continuar ---\n")
+
+	print("PREPROCESANDO LOS DATOS")
+	preprocess = [("var", VarianceThreshold(threshold=0.0)), ("scaled", StandardScaler()), ("PCA", PCA(n_components=0.95))]
+	preprocessor = Pipeline(preprocess)
+	X_train_preprocess = preprocessor.fit_transform(X_train)
+	print("Número de características de 'train' antes del preprocesado: {}".format(X_train.shape[1]))
+	print("Número de características de 'train' después del preprocesado: {}".format(X_train_preprocess.shape[1]))
+	#input("--- Pulsar tecla para continuar ---\n")
+
+	#print("Imprimiendo matriz de correlación antes y después de preprocesar los datos.")
+	#show_preprocess(VarianceThreshold(threshold=0.0).fit_transform(X_train),
+	#				X_train_preprocess, "Clasificación de 'optdigits'")
+	#input("--- Pulsar tecla para continuar ---\n"))
 
 if __name__ == "__main__":
 	main()
