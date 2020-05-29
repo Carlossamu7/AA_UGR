@@ -77,9 +77,9 @@ def get_headers():
 def data_info(X, y, statistic=True):
 	print("INFORMACIÓN DE LOS DATOS:")
 	print("Número de atributos: {} (uno es el goal)".format(len(X[0])+1))
-	print("Número de outliers: {}".format(len(X[X=='?'])))
+	print("Número de datos perdidos: {}".format(len(X[X=='?'])))
 	outliers = np.array([('?' in X[:, i]) for i in range(len(X[0]))])
-	print("Número de atributos que contienen outliers: {}".format(np.count_nonzero(outliers==True)))
+	print("Número de atributos que contienen datos perdidos: {}".format(np.count_nonzero(outliers==True)))
 	#print(outliers)
 	print("Intervalo en el que están las características: [{},{}]".format(np.min(X), np.max(X)))
 	print("Intervalo en el que están las etiquetas: [{},{}]".format(np.min(y), np.max(y)))
@@ -107,54 +107,6 @@ def data_info(X, y, statistic=True):
 		plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
 		plt.show()
 
-def preprocess_outliers(X, y, headers):
-	print("Índices de atributos no predictivos:")
-	to_delete = [0,1,2,3,4]
-	print(to_delete)
-	newX = np.delete(X, to_delete, axis=1)
-	newX[newX=='?'] = np.nan
-	newX = newX.astype('float64')
-	outliers = np.array([np.count_nonzero(np.isnan(newX[:, i])) for i in range(len(newX[0]))], dtype=int)
-	perc = np.empty(outliers.shape, dtype='float')
-	for i in range(len(perc)):
-		perc[i] = round(100 * outliers[i] / len(newX), 2)
-	np.set_printoptions(suppress=True)
-	print("\nNúmero de 'outliers' por atributo:")
-	print(outliers)
-	print("\nPorcentaje de 'outliers' por atributo:")
-	print(perc)
-	index = np.where(perc>10)[0]
-	to_treat_index = np.where((perc>0) & (perc<=10))[0]
-	print("\nÍndices de atributos con más de un 10% de 'outliers':")
-	print(index+5)
-	newX = np.delete(newX, index, axis=1)
-	print("\nÍndices de atributos con menos de un 10% de 'outliers' que hay que tratar:")
-	print(to_treat_index)
-	for i in to_treat_index:
-		col = newX[:, i]
-		pos = np.where(np.isnan(col))[0]
-		print("\n'outlier' en las posiciones: {}".format(pos))
-		for p in pos:
-			state = X[p][0]
-			print("'State' del 'outlier': " + state)
-			sum = 0
-			count = 0
-			for j in range(len(X)):
-				if(X[j][0]==state and j!=p):
-					sum += newX[j][i]
-					count += 1
-			newX[p][i] = round(sum/count,4)
-			print("Hay {} coincidencias de estado y se inserta el valor medio: {}".format(count, newX[p][i]))
-
-	#Arreglamos cabeceras
-	print("\nCabeceras de los atributos eliminados por ser no predictivos:")
-	print([headers[h] for h in to_delete])
-	newheaders = np.delete(headers, to_delete)
-	print("\nCabeceras de los atributos eliminados por ser 'outliers':")
-	print([newheaders[h] for h in index])
-	newheaders = np.delete(newheaders, index)
-	print("Ajustando las cabeceras de los atributos. De {} a {}".format(len(headers), len(newheaders)))
-	return newX, newheaders
 
 #---------------------- Dividiendo en 'train' y 'test' -------------------------#
 
@@ -197,25 +149,83 @@ def split_info(y_train, y_test):
 
 #------------------------------- Preprocesado ----------------------------------#
 
+def preprocess_missing_values(X, y, headers):
+	print("Índices de atributos no predictivos:")
+	to_delete = [0,1,2,3,4]
+	print(to_delete)
+	print("Cabeceras de los atributos eliminados por ser no predictivos:")
+	print([headers[h] for h in to_delete])
+	print("Elliminando atributos no predictivos...")
+	newheaders = np.delete(headers, to_delete)
+	newX = np.delete(X, to_delete, axis=1)
+	newX[newX=='?'] = np.nan
+	newX = newX.astype('float64')
+	input("--- Pulsar tecla para continuar ---\n")
+
+	np.set_printoptions(suppress=True)
+	outliers = np.array([np.count_nonzero(np.isnan(newX[:, i])) for i in range(len(newX[0]))], dtype=int)
+	perc = np.empty(outliers.shape, dtype='float')
+	for i in range(len(perc)):
+		perc[i] = round(100 * outliers[i] / len(newX), 2)
+	perc_extracted_pos = np.where(perc>0)[0]
+	num_extracted = [outliers[i] for i in perc_extracted_pos]
+	perc_extracted = [perc[i] for i in perc_extracted_pos]
+	headers_extracted = [newheaders[i] for i in perc_extracted_pos]
+	tab = [["Cabecera", "Val. perdidos", "Porcentaje (%)"]]
+	for i in range(len(num_extracted)):
+		tab.append([headers_extracted[i], num_extracted[i], perc_extracted[i]])
+	print("Mostrando atributos que tienen valores perdidos:")
+	print(tabulate(tab, headers='firstrow', numalign='center', stralign='center', tablefmt='fancy_grid'))
+	#print("Número de datos perdidos por atributo:")
+	#print(outliers)
+	#print("\nPorcentaje de datos perdidos por atributo:")
+	#print(perc)
+	input("--- Pulsar tecla para continuar ---\n")
+
+	index = np.where(perc>10)[0]
+	print("Índices de atributos con más de un 10% de datos perdidos:")
+	print(index+5)
+	print("\nCabeceras de los atributos eliminados por ser datos perdidos:")
+	print([newheaders[h] for h in index])
+	print("Eliminando atributos no predictivos...")
+	newheaders = np.delete(newheaders, index)
+	newX = np.delete(newX, index, axis=1)
+	input("--- Pulsar tecla para continuar ---\n")
+
+	to_treat_index = np.where((perc>0) & (perc<=10))[0]
+	print("\nÍndices de atributos con menos de un 10% de datos perdidos que hay que tratar:")
+	print(to_treat_index)
+	print("Haciendo la media de las instancias del mismo estado para dicho atributo...")
+	for i in to_treat_index:
+		col = newX[:, i]
+		pos = np.where(np.isnan(col))[0]
+		print("   Datos perdidos en las posiciones: {}".format(pos))
+		for p in pos:
+			state = X[p][0]
+			print("   'State' del 'outlier': " + state)
+			sum = 0
+			count = 0
+			for j in range(len(X)):
+				if(X[j][0]==state and j!=p):
+					sum += newX[j][i]
+					count += 1
+			newX[p][i] = round(sum/count,4)
+			print("   Hay {} coincidencias de estado y se inserta el valor medio: {}".format(count, newX[p][i]))
+
+	print("\nEl número de atributos ha pasado de {} a {}".format(len(headers), len(newheaders)))
+	return newX, newheaders
+
 """ Muestra matriz de correlación de los datos antes y después del preprocesado.
-- data: datos originales.
-- preprocess_data: datos preprocesados.
+- data: datos.
 - title (op): título. Por defecto "".
 """
-def show_preprocess(data, preprocess_data, title=""):
-	fig, axs = plt.subplots(1, 2, figsize=[12.0, 5.8])
-
+def show_preprocess(data, title=""):
+	fig, axs = plt.subplots()
 	corr_matrix = np.abs(np.corrcoef(data.T))
-	im = axs[0].matshow(corr_matrix, cmap="GnBu")
-	axs[0].title.set_text("Antes del preprocesado")
-
-	corr_matrix_post = np.abs(np.corrcoef(preprocess_data.T))
-	axs[1].matshow(corr_matrix_post, cmap="GnBu")
-	axs[1].title.set_text("Después del preprocesado")
-
+	im = axs.matshow(corr_matrix, cmap="GnBu")
 	fig.suptitle(title)
 	plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
-	fig.colorbar(im, ax=axs.ravel().tolist(), shrink=0.6)
+	fig.colorbar(im, ax=axs, shrink=0.6)
 	plt.show()
 
 #------------------------------ Clasificadores ---------------------------------#
@@ -337,8 +347,8 @@ def main():
 	data_info(X, y)
 	input("--- Pulsar tecla para continuar ---\n")
 
-	print("PREPROCESADO DE OUTLIERS")
-	newX, headers = preprocess_outliers(X, y, headers)
+	print("PREPROCESADO DE DATOS PERDIDOS\n")
+	newX, headers = preprocess_missing_values(X, y, headers)
 	input("--- Pulsar tecla para continuar ---\n")
 	data_info(newX, y, False)
 	input("--- Pulsar tecla para continuar ---\n")
@@ -349,17 +359,38 @@ def main():
 	input("--- Pulsar tecla para continuar ---\n")
 
 	print("PREPROCESANDO LOS DATOS")
-	preprocess = [("var", VarianceThreshold(threshold=0.0)), ("scaled", StandardScaler()), ("PCA", PCA(n_components=0.95))]
+	preprocess = [("var", VarianceThreshold(threshold=0.0))]
 	preprocessor = Pipeline(preprocess)
 	X_train_preprocess = preprocessor.fit_transform(X_train)
-	print("Número de características de 'train' antes del preprocesado: {}".format(X_train.shape[1]))
-	print("Número de características de 'train' después del preprocesado: {}".format(X_train_preprocess.shape[1]))
-	#input("--- Pulsar tecla para continuar ---\n")
+	print("Número de características con varianza cero: {}".format(X_train.shape[1] - X_train_preprocess.shape[1]))
+	input("--- Pulsar tecla para continuar ---\n")
 
-	#print("Imprimiendo matriz de correlación antes y después de preprocesar los datos.")
-	#show_preprocess(VarianceThreshold(threshold=0.0).fit_transform(X_train),
-	#				X_train_preprocess, "Clasificación de 'optdigits'")
-	#input("--- Pulsar tecla para continuar ---\n"))
+	print("Imprimiendo matriz de correlación después de preprocesar los datos.")
+	show_preprocess(X_train_preprocess, "Regresión de 'communities' - Matriz de correlación")
+	input("--- Pulsar tecla para continuar ---\n")
+
+	# Obtener valores medios y desviaciones de las evaluaciones
+	print("EVALUANDO DIFERENTES MODELOS CON VALIDACIÓN 5-Fold:")
+	print("- Cuatro modelos de 'Regresión Logística'.")
+	Cs = [0.01, 0.1, 1.0, 10.0]
+	# Validación cruzada 5-fold conservando la proporcion
+	cross_val = StratifiedKFold(n_splits=5, shuffle=True, random_state=1)
+	# Junto todos los clasificadores con Pipeline
+	models = RL_clasificators(Cs)
+	# Evalúo los modelos
+	means, devs = models_eval(models, X_train, y_train, cv=cross_val)
+	# Imprimo resultados
+	tab = [["Modelo", "C", "Media",  "Desv. típica"]]
+	for i in range(len(Cs)):
+		tab.append(["LR", Cs[i], means[i], devs[i]])
+	for i in range(len(Cs)):
+		tab.append(["SVM", Cs[i], means[i+len(Cs)], devs[i+len(Cs)]])
+	print(tabulate(tab, headers='firstrow', tablefmt='fancy_grid'))
+	input("--- Pulsar tecla para continuar ---\n")
+
+	# Mostrando el mejor modelo, su matriz de confusión y sus errores.
+	#show_confussion_errors(models[1], X_train, y_train, X_test, y_test, "Regresión Logística (C=0.1)")
+	#input("--- Pulsar tecla para continuar ---\n")
 
 if __name__ == "__main__":
 	main()
