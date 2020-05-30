@@ -319,15 +319,20 @@ def main():
 	print("###############################")
 
 	print("\nLeyendo datos de 'communities'.\n")
+	# Leemos datos
 	X, y = read_data("datos/communities.data", ",")
+	# Leemos cabeceras
 	headers = get_headers()
+	# Las etiquetas son flotantes
 	y = y.astype('float64')
+	# Información de los datos
 	data_info(X, y)
 	input("--- Pulsar tecla para continuar ---\n")
 
 	print("PREPROCESADO DE DATOS PERDIDOS\n")
 	newX, headers = preprocess_missing_values(X, y, headers)
 	input("--- Pulsar tecla para continuar ---\n")
+	# Información de los datos después de quitar los missing values
 	data_info(newX, y, False)
 	input("--- Pulsar tecla para continuar ---\n")
 
@@ -356,12 +361,14 @@ def main():
 	models = SGD_regressors(alphas, tols)
 	# Evalúo los modelos
 	scores = models_eval(models, X_train, y_train, X_test, y_test)
+	# Muestro los resultados
 	tab = info_scores(alphas, tols, scores)
 	input("--- Pulsar tecla para continuar ---\n")
 
 	print("ELECCIÓN DEL MEJOR MODELO")
+	# Posición del mejor modelo en models
 	pos = select_best(tab)-1
-	# Mostrando el mejor modelo, su matriz de confusión y sus errores.
+	# Mostrando el mejor modelo y sus errores.
 	models[pos].fit(X_train, y_train)
 	y_pred = models[pos].predict(X_test)
 	mse = mean_squared_error(y_pred, y_test)
