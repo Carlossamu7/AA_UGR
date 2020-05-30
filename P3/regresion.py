@@ -15,13 +15,9 @@ from tabulate import tabulate
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import VarianceThreshold
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
 from sklearn.model_selection import StratifiedKFold
-from sklearn.linear_model import LogisticRegression
-from sklearn.svm import LinearSVC
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import confusion_matrix
+from sklearn.linear_model import SGDRegressor
+from sklearn.metrics import mean_squared_error
 import warnings		# Quita warnings
 warnings.filterwarnings('ignore')
 
@@ -42,6 +38,8 @@ def read_data(filename, separator):
 	data = np.loadtxt(filename, delimiter=separator, dtype=object)
 	return data[:, :-1], data[:, -1]
 
+""" Devuelve las cabeceras del problema.
+"""
 def get_headers():
 	return ['state', 'county', 'community', 'communityname', 'fold', 'population', 'householdsize',
           'racepctblack', 'racePctWhite', 'racePctAsian', 'racePctHisp', 'agePct12t21',
@@ -107,9 +105,12 @@ def data_info(X, y, statistic=True):
 		plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
 		plt.show()
 
-
 #---------------------- Dividiendo en 'train' y 'test' -------------------------#
 
+""" Da información acerca de la separación realizada en 'train' y 'test'.
+- y_train: etiquetas de 'train'.
+- y_test: etiquetas de 'test'.
+"""
 def split_info(y_train, y_test):
 	size_train = len(y_train)
 	size_test = len(y_test)
@@ -149,13 +150,18 @@ def split_info(y_train, y_test):
 
 #------------------------------- Preprocesado ----------------------------------#
 
+""" Preprocesamiento de los missing values. Devuelve el nuevo X y sus cabeceras.
+- X: características.
+- y: etiquetas.
+- headers: cabeceras.
+"""
 def preprocess_missing_values(X, y, headers):
 	print("Índices de atributos no predictivos:")
 	to_delete = [0,1,2,3,4]
 	print(to_delete)
 	print("Cabeceras de los atributos eliminados por ser no predictivos:")
 	print([headers[h] for h in to_delete])
-	print("Elliminando atributos no predictivos...")
+	print("Eliminando atributos no predictivos...")
 	newheaders = np.delete(headers, to_delete)
 	newX = np.delete(X, to_delete, axis=1)
 	newX[newX=='?'] = np.nan
@@ -215,7 +221,7 @@ def preprocess_missing_values(X, y, headers):
 	print("\nEl número de atributos ha pasado de {} a {}".format(len(headers), len(newheaders)))
 	return newX, newheaders
 
-""" Muestra matriz de correlación de los datos antes y después del preprocesado.
+""" Muestra matriz de correlación de los datos.
 - data: datos.
 - title (op): título. Por defecto "".
 """
@@ -230,104 +236,76 @@ def show_preprocess(data, title=""):
 
 #------------------------------ Clasificadores ---------------------------------#
 
-""" Función para crear una lista de pipelines con el modelo RL para diferentes valores de C
-sobre los datos preprocesados. Devuelve dicha lista.
-- Cs: Lista de valores C.
+""" Función para crear una lista de modelos basados en SGDR para diferentes valores
+de alpha y tol sobre los datos preprocesados. Devuelve dicha lista.
+- alphas: lista de valores de alpha.
+- tols: lista de tolerancias.
 """
-def RL_clasificators(Cs):
-    # Inicializando lista de Pipeline
-    pipes = []
-
-    for c in Cs:	# Para cada C se inserta un modelo.
-        pipes.append(Pipeline([("var", VarianceThreshold(threshold=0.0)),
-								   ("scaled", StandardScaler()),
-								   ("PCA", PCA(n_components=0.95)),
-								   ("svm",  LogisticRegression(C=c, multi_class='multinomial'))]))
-    return pipes
-
-""" Función para crear una lista de pipelines con el modelo SVM para diferentes valores de C
-sobre los datos preprocesados. Devuelve dicha lista.
-- Cs: Lista de valores C.
-"""
-def SVM_clasificators(Cs):
-    # Inicializando lista de Pipeline
-    pipes = []
-
-    for c in Cs:	# Para cada C se inserta un modelo.
-        pipes.append(Pipeline([("var", VarianceThreshold(threshold=0.0)),
-								   ("scaled", StandardScaler()),
-								   ("PCA", PCA(n_components=0.95)),
-								   ("log",  LinearSVC(C=c, random_state=1, loss='hinge', multi_class="crammer_singer"))]))
-    return pipes
+def SGD_regressors(alphas, tols):
+	models = []
+	for al in alphas:
+		for to in tols:
+			models.append(SGDRegressor(loss="squared_loss", penalty="l2", alpha=al, tol=to))
+	return models
 
 """ Funcion para evaluar una lista de modelos.
-Devuelve las medias y desv típicas de cada modelo.
+Devuelve los scores obtenidos.
 - models: modelos en formato lista.
-- X: características.
-- y: etiquetas.
-- cv (op): parámetro de validación cruzada. Por defecto 5.
-"""
-def models_eval(models, X, y, cv=5):
-    means = []		# medias de las cv de cada modelo.
-    devs = []		# desv. típicas de las cv de cada modelo.
-
-    # Se evalúan los modelos actualizando dichas listas.
-    for model in models:
-        results = cross_val_score(model, X, y, scoring="accuracy", cv=cv)
-        means.append(abs(results.mean()))		# Valor absoluto de la media
-        devs.append(np.std(results))			# Guardar desviaciones
-
-    return means, devs
-
-#---------------------- Matrices de confución y errores ------------------------#
-
-""" Muestra matriz de confusión.
-- y_real: etiquetas reales.
-- y_pred: etiquetas predichas.
-- norm (op): indica si normalizar (dar en %) la matriz de confusión. Por defecto 'True'.
-"""
-def show_confussion_matrix(y_real, y_pred, mtype, norm=True):
-	mat = confusion_matrix(y_real, y_pred)
-	if(norm):
-		mat = 100*mat.astype("float64")/mat.sum(axis=1)[:, np.newaxis]
-	fig, ax = plt.subplots()
-	ax.matshow(mat, cmap="GnBu")
-	ax.set(title="Matriz de confusión para {}".format(mtype),
-		   xticks=np.arange(10), yticks=np.arange(10),
-		   xlabel="Etiqueta", ylabel="Predicción")
-
-	for i in range(10):
-		for j in range(10):
-			if(norm):
-				ax.text(j, i, "{:.0f}%".format(mat[i, j]), ha="center", va="center",
-					color="black" if mat[i, j] < 50 else "white")
-			else:
-				ax.text(j, i, "{:.0f}".format(mat[i, j]), ha="center", va="center",
-					color="black" if mat[i, j] < 50 else "white")
-	plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
-	plt.show()
-
-""" Muestra información y estadísticas de los datos.
-- model: modelo.
 - X_train: características del conjunto de entrenamiento.
 - y_train: etiquetas del conjunto de entrenamiento.
 - X_test: características del conjunto de test.
 - y_test: etiquetas del conjunto de test.
+"""
+def models_eval(models, X_train, y_train, X_test, y_test):
+	dats = []		# medias de las cv de cada modelo.
+
+	# Se evalúan los modelos actualizando dichas listas.
+	for model in models:
+		model.fit(X_train, y_train)
+		dats.append([model.score(X_train, y_train), model.score(X_test, y_test)])
+
+	return dats
+
+""" Imprime la tabla de los scores. Devuelve dicha tabla.
+- alphas: lista de valores de alpha.
+- tols: lista de tolerancias.
+- scores: medida R^2 en 'train' y 'test'.
+"""
+def info_scores(alphas, tols, scores):
+	tab = [["Modelo", "Alpha", "Tol.", "R^2 'train'", "R^2 'test'"]]
+
+	for i in range(len(alphas)):
+		for j in range(len(tols)):
+			tab.append(["SGDR", alphas[i], tols[j], scores[i*len(tols)+j][0], scores[i*len(tols)+j][1]])
+
+	print("Mostrando tabla con los 'scores':")
+	print(tabulate(tab, headers='firstrow', numalign='center', stralign='center', tablefmt='fancy_grid'))
+	return tab
+
+""" Elije el mejor modelo de la tabla.
+- tab: tabla.
+"""
+def select_best(tab):
+	col = [tab[i][4] for i in range(1,len(tab))]
+	maxim = max(col)
+	pos = np.where(col==maxim)[0] + 1
+	print("El mejor R^2 es: {}".format(maxim))
+	print("El MEJOR MODELO es: {} (alpha={} y tol={})".format(tab[pos[0]][0], tab[pos[0]][1], tab[pos[0]][2]))
+	return pos[0]
+
+#---------------------------------- Errores ------------------------------------#
+
+""" Muestra información y estadísticas de los datos.
+- model: modelo.
+- scores: medida R^2 en 'train' y 'test'.
+- mse: error cuadrático medio.
 - title (op): título del modelo. Por defecto "".
 """
-def show_confussion_errors(model, X_train, y_train, X_test, y_test, title=""):
-	print("MEJOR MODELO: '" + title + "'. De ahora en adelante se usa éste.")
+def show_errors(model, scores, mse, title=""):
 	print(model)
-	print("Entrenando el modelo con el conjunto 'train'.")
-	model.fit(X_train, y_train)
-	print("Haciendo las predicciones sobre 'test'")
-	y_pred = model.predict(X_test)
-	print("Mostrando matriz de confusión sin normalizar.")
-	show_confussion_matrix(y_test, y_pred, title, False)
-	print("Mostrando matriz de confusión normalizada.")
-	show_confussion_matrix(y_test, y_pred, title)
-	print("Error del modelo en 'train': {:.5f}".format(1 - model.score(X_train, y_train)))
-	print("Error del modelo en 'test': {:.5f}".format(1 - model.score(X_test, y_test)))
+	print("R^2 del modelo en 'train': {:.5f}".format(scores[0]))	# R^2
+	print("R^2 del modelo en 'test': {:.5f}".format(scores[1]))		# R^2
+	print("Error cuadrático medio: {}".format(mse))
 
 
 ########################
@@ -370,27 +348,25 @@ def main():
 	input("--- Pulsar tecla para continuar ---\n")
 
 	# Obtener valores medios y desviaciones de las evaluaciones
-	print("EVALUANDO DIFERENTES MODELOS CON VALIDACIÓN 5-Fold:")
-	print("- Cuatro modelos de 'Regresión Logística'.")
-	Cs = [0.01, 0.1, 1.0, 10.0]
-	# Validación cruzada 5-fold conservando la proporcion
-	cross_val = StratifiedKFold(n_splits=5, shuffle=True, random_state=1)
-	# Junto todos los clasificadores con Pipeline
-	models = RL_clasificators(Cs)
+	print("EVALUANDO DIFERENTES MODELOS")
+	print("- Seis modelos 'SGDRegressor'.")
+	alphas = [0.00001, 0.0001, 0.001]
+	tols = [1e-9, 1e-8, 1e-7]
+	# Creación de los modelos
+	models = SGD_regressors(alphas, tols)
 	# Evalúo los modelos
-	means, devs = models_eval(models, X_train, y_train, cv=cross_val)
-	# Imprimo resultados
-	tab = [["Modelo", "C", "Media",  "Desv. típica"]]
-	for i in range(len(Cs)):
-		tab.append(["LR", Cs[i], means[i], devs[i]])
-	for i in range(len(Cs)):
-		tab.append(["SVM", Cs[i], means[i+len(Cs)], devs[i+len(Cs)]])
-	print(tabulate(tab, headers='firstrow', tablefmt='fancy_grid'))
+	scores = models_eval(models, X_train, y_train, X_test, y_test)
+	tab = info_scores(alphas, tols, scores)
 	input("--- Pulsar tecla para continuar ---\n")
 
+	print("ELECCIÓN DEL MEJOR MODELO")
+	pos = select_best(tab)-1
 	# Mostrando el mejor modelo, su matriz de confusión y sus errores.
-	#show_confussion_errors(models[1], X_train, y_train, X_test, y_test, "Regresión Logística (C=0.1)")
-	#input("--- Pulsar tecla para continuar ---\n")
+	models[pos].fit(X_train, y_train)
+	y_pred = models[pos].predict(X_test)
+	mse = mean_squared_error(y_pred, y_test)
+	show_errors(models[pos], scores[pos], mse, "SGDR (alpha={}, tol={})".format(tab[pos+1][1], tab[pos+1][2]))
+	input("--- Pulsar tecla para continuar ---\n")
 
 if __name__ == "__main__":
 	main()

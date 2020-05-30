@@ -118,7 +118,7 @@ def show_preprocess(data, preprocess_data, title=""):
 
 """ Función para crear una lista de pipelines con el modelo RL para diferentes valores de C
 sobre los datos preprocesados. Devuelve dicha lista.
-- Cs: Lista de valores C.
+- Cs: lista de valores C.
 """
 def RL_clasificators(Cs):
     # Inicializando lista de Pipeline
@@ -133,7 +133,7 @@ def RL_clasificators(Cs):
 
 """ Función para crear una lista de pipelines con el modelo SVM para diferentes valores de C
 sobre los datos preprocesados. Devuelve dicha lista.
-- Cs: Lista de valores C.
+- Cs: lista de valores C.
 """
 def SVM_clasificators(Cs):
     # Inicializando lista de Pipeline
