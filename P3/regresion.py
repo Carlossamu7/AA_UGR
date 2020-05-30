@@ -97,7 +97,9 @@ def data_info(X, y, statistic=True):
 			tab[i][1] = str(num[i-1]) + "  (" + str(round(100*num[i-1]/len(y), 2)) + "%)"
 		print("\nNúmero de instancias de cada dígito")
 		print(tabulate(tab, headers='firstrow', numalign='center', stralign='center', tablefmt='fancy_grid'))
+		input("--- Pulsar tecla para continuar ---\n")
 
+		print("Mostrando gráfica de barras asociada...")
 		plt.bar([tab[i][0] for i in range(1,len(tab))], num, align="center")
 		plt.xlabel("Intervalo")
 		plt.ylabel("Núm. instancias")
@@ -133,18 +135,20 @@ def split_info(y_train, y_test):
 		tab[i][2] = str(num_test[i-1]) + "  (" + str(round(100*num_test[i-1]/len(y_test), 2)) + "%)"
 	print("\nNúmero de instancias de cada dígito para 'train' y 'test'")
 	print(tabulate(tab, headers='firstrow', numalign='center', stralign='center', tablefmt='fancy_grid'))
+	input("--- Pulsar tecla para continuar ---\n")
 
+	print("Mostrando gráficas de barras asociadas...")
 	plt.bar([tab[i][0] for i in range(1,len(tab))], num_train, align="center")
 	plt.xlabel("Intervalo")
 	plt.ylabel("Núm. instancias")
-	plt.title("Gráfica de barras de las etiquetas")
+	plt.title("Gráfica de barras de las etiquetas de 'train'")
 	plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
 	plt.show()
 
 	plt.bar([tab[i][0] for i in range(1,len(tab))], num_test, align="center")
 	plt.xlabel("Intervalo")
 	plt.ylabel("Núm. instancias")
-	plt.title("Gráfica de barras de las etiquetas")
+	plt.title("Gráfica de barras de las etiquetas de 'test'")
 	plt.gcf().canvas.set_window_title("Práctica 3 - Clasificación")
 	plt.show()
 
@@ -191,7 +195,7 @@ def preprocess_missing_values(X, y, headers):
 	index = np.where(perc>10)[0]
 	print("Índices de atributos con más de un 10% de datos perdidos:")
 	print(index+5)
-	print("\nCabeceras de los atributos eliminados por ser datos perdidos:")
+	print("Cabeceras de los atributos eliminados por ser datos perdidos:")
 	print([newheaders[h] for h in index])
 	print("Eliminando atributos no predictivos...")
 	newheaders = np.delete(newheaders, index)
